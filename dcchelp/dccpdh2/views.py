@@ -2,22 +2,24 @@ from django.contrib import messages
 from django.http import HttpResponse, JsonResponse, HttpResponseServerError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import render_to_string
-from django.views.generic import ListView, TemplateView
+from django.urls import reverse_lazy
+from django.views.generic import ListView, TemplateView, CreateView, DeleteView
 
-from .forms import DocumentArticleForm
+from .forms import DocumentArticleForm, ChangeForm
 from .models import Tag, Change, DocumentTypes, DocumentArticle, DocumentSubType, FAQ
 
 
 menu = [
     {'title': 'Главная', 'url_name': 'home'},
-    {'title': 'Процедуры', 'url_name': 'procedures'},
+    {'title': 'Процедуры', 'url_name': 'procedures'}, # Подумать над целесообразностью раздела
     {'title': 'Лист изменений', 'url_name': 'list_of_changes'},
     {'title': 'Оформление документации', 'url_name': 'documentation'},
-    {'title': 'Запуск процессов', 'url_name': 'processes'},
+    {'title': 'Запуск процессов', 'url_name': 'processes'}, # Подумать над целесообразностью раздела
     {'title': 'FAQ', 'url_name': 'FAQ'},
 ]
 
 
+# Главная страница. +Дополнить еще двумя разделами для отображения
 class IndexView(TemplateView):
     template_name = 'index.html'
 
@@ -33,6 +35,7 @@ class IndexView(TemplateView):
         return context
 
 
+# Раздел листа изменений
 class ListOfChangesView(ListView):
     template_name = 'list_of_changes.html'
     context_object_name = 'changes'
@@ -42,57 +45,36 @@ class ListOfChangesView(ListView):
         return Change.objects.all()
 
 
+# Реализована функция, т.к. используется AJAX (обновление данных на странице без обновления самой страницы)
 def add_change(request):
     if request.method == 'POST':
-        try:
-            # Получаем данные из формы
-            number = request.POST.get('change_number')
-            title = request.POST.get('change_title')
-            text = request.POST.get('change_description')  # HTML с форматированием
-            link_approvement = request.POST.get('approval_link')
-
-            if not text or text.strip() in ['', '<br>', '<p></p>', '<div><br></div>']:
-                # Вернуть ошибку или обработать как считаешь нужным
-                return HttpResponse("Ошибка: описание изменения обязательно", status=400)
-
-            # Создаем изменение
-            change = Change.objects.create(
-                number=number,
-                title=title,
-                text=text,
-                link_approvement=link_approvement
-            )
-
-            messages.success(request, 'Изменение успешно добавлено!')
-            return redirect('list_of_changes')
-
-        except Exception as e:
-            messages.error(request, f'Ошибка при добавлении изменения: {str(e)}')
-
-    # Для GET запроса показываем форму с тегами
-    all_tags = Tag.objects.all()
-    return render(request, 'list_of_changes.html', {'all_tags': all_tags})
+        form = ChangeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False, 'errors': form.errors})
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
+# Реализована функция, т.к. используется AJAX (обновление данных на странице без обновления самой страницы)
 def edit_change(request, change_id):
     change = get_object_or_404(Change, id=change_id)
-
     if request.method == 'POST':
-        change.number = request.POST.get('change_number')
-        change.title = request.POST.get('change_title')
-        change.text = request.POST.get('change_description')
-        change.link_approvement = request.POST.get('approval_link')
-        change.save()
-        return JsonResponse({'success': True})
+        form = ChangeForm(request.POST, instance=change)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False, 'errors': form.errors})
 
     return JsonResponse({
         'number': change.number,
         'title': change.title,
-        'text': change.text,  # отправляем как text
+        'text': change.text,
         'link_approvement': change.link_approvement,
     })
 
 
+# Реализована функция, т.к. используется AJAX (обновление данных на странице без обновления самой страницы)
 def cancel_change(request, change_id):
     if request.method == 'POST':
         change = get_object_or_404(Change, id=change_id)
@@ -101,6 +83,7 @@ def cancel_change(request, change_id):
         return JsonResponse({'success': True})
 
 
+# Реализована функция, т.к. используется AJAX (обновление данных на странице без обновления самой страницы)
 def delete_change(request, change_id):
     if request.method == 'POST':
         change = get_object_or_404(Change, id=change_id)

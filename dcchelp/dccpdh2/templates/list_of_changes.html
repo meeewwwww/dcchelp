@@ -54,8 +54,34 @@
 <script>
 let currentEditingId = null;
 
+window.formatText = function(command) {
+    const editor = document.getElementById('text_editor');
+    if (editor) {
+        editor.focus();
+        document.execCommand(command, false, null);
+        updateHiddenField();
+    }
+};
+
+// Функция обновления скрытого поля
+function updateHiddenField() {
+    const editor = document.getElementById('text_editor');
+    const hiddenTextarea = document.getElementById('text');
+    if (editor && hiddenTextarea) {
+        hiddenTextarea.value = editor.innerHTML;
+    }
+}
+
 // Функции модального окна
 function openModal() {
+    // Очистка полей
+    document.getElementById('number').value = '';
+    document.getElementById('title').value = '';
+    document.getElementById('link_approvement').value = '';
+    document.getElementById('text_editor').innerHTML = '';
+    document.getElementById('text').value = '';
+    currentEditingId = null;
+
     document.getElementById('changeModal').style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
@@ -63,43 +89,40 @@ function openModal() {
 function closeModal() {
     document.getElementById('changeModal').style.display = 'none';
     document.body.style.overflow = 'auto';
-    currentEditingId = null;
-    document.getElementById('changeForm').reset();
-    document.getElementById('change_description_editor').innerHTML = '';
-    document.getElementById('change_description').value = '';
 }
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('changeForm');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault(); // Предотвращаем стандартную отправку
+if (form) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
 
-            const formData = new FormData(this);
+        updateHiddenField();
 
-            // Определяем URL для отправки
-            const url = currentEditingId ? `/change/${currentEditingId}/edit/` : this.action;
+        const formData = new FormData(this);
 
-            fetch(url, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Закрываем модальное окно
-                    closeModal();
-                    // Перезагружаем страницу чтобы увидеть изменения
-                    window.location.reload();
-                }
-            })
-            .catch(error => console.error('Ошибка:', error));
-        });
-    }
+        const url = currentEditingId ? `/change/${currentEditingId}/edit/` : this.action;
+
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => {
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                closeModal();
+                window.location.reload();
+            }
+        })
+        .catch(error => console.error('Ошибка:', error));
+    });
+}
 
     // Сворачивание/разворачивание
     document.querySelectorAll('.change-header').forEach(header => {
@@ -126,11 +149,11 @@ function editChange(changeId) {
         .then(data => {
             openModal();
             setTimeout(() => {
-                document.getElementById('change_description_editor').innerHTML = data.text;
-                document.getElementById('change_description').value = data.text;
-                document.getElementById('change_number').value = data.number || '';
-                document.getElementById('change_title').value = data.title || '';
-                document.getElementById('approval_link').value = data.link_approvement || '';
+                document.getElementById('text_editor').innerHTML = data.text;
+                document.getElementById('text').value = data.text;
+                document.getElementById('number').value = data.number || '';
+                document.getElementById('title').value = data.title || '';
+                document.getElementById('link_approvement').value = data.link_approvement || '';
                 currentEditingId = changeId;
             }, 100);
         })

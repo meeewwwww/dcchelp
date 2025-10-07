@@ -8,32 +8,32 @@
             <form method="POST" action="{% url 'add_change' %}" id="changeForm">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="change_number">Номер изменения:</label>
-                    <input type="text" id="change_number" name="change_number" required>
+                    <label for="number">Номер изменения:</label>
+                    <input type="text" id="number" name="number" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="change_title">Название:</label>
-                    <input type="text" id="change_title" name="change_title" required>
+                    <label for="title">Название:</label>
+                    <input type="text" id="title" name="title" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="change_description">Описание:</label>
+                    <label for="text">Описание:</label>
                     <div class="text-editor-toolbar">
                         <button type="button" onclick="formatText('bold')" title="Жирный"><b>B</b></button>
                         <button type="button" onclick="formatText('italic')" title="Курсив"><i>I</i></button>
                         <button type="button" onclick="formatText('underline')" title="Подчеркивание"><u>U</u></button>
                     </div>
                     <div class="text-editor-wrapper">
-                        <div id="change_description_editor" class="text-editor" contenteditable="true"></div>
+                        <div id="text_editor" class="text-editor" contenteditable="true"></div>
                     </div>
                     <!-- Скрытое поле для отправки HTML -->
-                    <textarea id="change_description" name="change_description" style="display:none"></textarea>
+                    <textarea id="text" name="text" style="display:none"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="approval_link">Ссылка на согласование:</label>
-                    <input type="url" id="approval_link" name="approval_link">
+                    <label for="link_approvement">Ссылка на согласование:</label>
+                    <input type="url" id="link_approvement" name="link_approvement">
                 </div>
 
                 <div class="form-actions">
@@ -44,101 +44,3 @@
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('changeModal');
-    const form = document.getElementById('changeForm');
-    const editor = document.getElementById('change_description_editor');
-    const hiddenTextarea = document.getElementById('change_description');
-
-    // Функции для модального окна
-    window.openModal = function() {
-        if (modal) {
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-
-            // ОЧИСТКА ВСЕХ ПОЛЕЙ ПРИ ОТКРЫТИИ
-            document.getElementById('change_number').value = '';
-            document.getElementById('change_title').value = '';
-            document.getElementById('approval_link').value = '';
-            if (editor) {
-                editor.innerHTML = '';
-                updateHiddenField();
-            }
-        }
-    };
-
-    window.closeModal = function() {
-        if (modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    };
-
-    // Функции для редактора текста
-    window.formatText = function(command) {
-        if (editor) {
-            editor.focus();
-            document.execCommand(command, false, null);
-            updateHiddenField();
-        }
-    };
-
-    // Функция обновления скрытого поля
-    function updateHiddenField() {
-        if (editor && hiddenTextarea) {
-            hiddenTextarea.value = editor.innerHTML;
-        }
-    }
-
-    // Обновляем скрытое поле при любом изменении в редакторе
-    if (editor) {
-        editor.addEventListener('input', updateHiddenField);
-        editor.addEventListener('paste', updateHiddenField);
-        editor.addEventListener('cut', updateHiddenField);
-    }
-
-    // Обновляем скрытое поле перед отправкой формы
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            updateHiddenField();
-
-            // Проверяем, что есть содержимое в редакторе
-            const editorContent = editor ? editor.innerHTML.trim() : '';
-            const hasValidContent = editorContent &&
-                                  editorContent !== '<br>' &&
-                                  editorContent !== '<p></p>' &&
-                                  editorContent !== '<div><br></div>';
-
-            if (!hasValidContent) {
-                e.preventDefault();
-                alert('Пожалуйста, введите описание изменения');
-                if (editor) {
-                    editor.focus();
-                }
-                return;
-            }
-
-            console.log('Отправляемые данные описания:', hiddenTextarea.value);
-            setTimeout(function(){ location.reload() }, 500);
-        });
-    }
-
-    // Закрытие модального окна
-    if (modal) {
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeModal();
-            }
-        };
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
-        });
-    }
-
-});
-</script>
