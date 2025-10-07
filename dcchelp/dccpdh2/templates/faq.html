@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="faq-container">
+    <div class="faq-sidebar left"></div>
+
+    <div class="faq-content">
+        <h1>Часто задаваемые вопросы</h1>
+
+        {% for qa in qas %}
+        <div class="faq-item">
+            <div class="faq-question">{{ qa.question }}</div>
+            <div class="faq-answer">{{ qa.answer }}</div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <div class="faq-sidebar right"></div>
+</div>
+{% endblock %}

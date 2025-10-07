@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-container">
+    <!-- Боковая панель с типами документов (20%) -->
+    <aside class="categories-sidebar">
+
+        <div class="categories-tree">
+            {% for doc_type in document_types %}
+            <div class="category-item">
+                <div class="category-main" onclick="toggleSubcategories(this)">
+                    <span class="category-arrow">▶</span>
+                    <span class="category-name">{{ doc_type.ru_name }}</span>
+                </div>
+                <div class="subcategories">
+                    {% for subtype in doc_type.sub_types.all %}
+                    <div class="subcategory-item" onclick="loadSubtypeContent({{ doc_type.id }}, {{ subtype.id }})">
+                        {{ subtype.name }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Кнопка добавления статьи -->
+        <div class="add-article-section">
+            <button class="add-article-btn" onclick="openArticleForm()">
+                + Добавить статью
+            </button>
+        </div>
+    </aside>
+
+    <!-- Основной контент (80%) -->
+    <main class="content-area">
+        <div class="content-header">
+            <h2 id="content-title">Выберите тип документа</h2>
+        </div>
+        <div class="content-body" id="content-body">
+            <p>Выберите тип документа или подтип для просмотра информации</p>
+        </div>
+    </main>
+</div>
+
+
+<style>
+.page-container {
+    display: flex;
+    min-height: 80vh;
+}
+
+.categories-sidebar {
+    width: 20%;
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.categories-header {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+
+.categories-tree {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.category-item {
+    margin-bottom: 5px;
+}
+
+.category-main {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.category-main:hover {
+    background: #e9ecef;
+}
+
+.category-arrow {
+    margin-right: 8px;
+    transition: transform 0.3s ease;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.subcategories {
+    display: none;
+    margin-left: 20px;
+    margin-top: 5px;
+}
+
+.subcategories.show {
+    display: block;
+}
+
+.subcategory-item {
+    padding: 8px 12px;
+    margin: 2px 0;
+    background: white;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.subcategory-item:hover {
+    background: #A46BC2;
+    color: white;
+    border-left-color: #763D94;
+}
+
+.content-area {
+    width: 80%;
+    padding: 20px;
+    background: white;
+}
+
+/* Стили для кнопки добавления */
+.add-article-section {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+}
+
+.add-article-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #904AB5 0%, #422253 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.add-article-btn:hover {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+</style>
+
+<script>
+
+// Остальные функции для дерева категорий
+function toggleSubcategories(element) {
+    const subcategories = element.nextElementSibling;
+    const arrow = element.querySelector('.category-arrow');
+
+    subcategories.classList.toggle('show');
+    arrow.style.transform = subcategories.classList.contains('show') ? 'rotate(90deg)' : 'rotate(0deg)';
+}
+
+function loadSubtypeContent(docTypeId, subtypeId) {
+    fetch(`/documentation/content/${docTypeId}/${subtypeId}/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('content-title').textContent = data.title;
+            document.getElementById('content-body').innerHTML = data.content;
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+        });
+}
+
+function openArticleForm() {
+    fetch('/documentation/add-article/')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('content-title').textContent = 'Добавить статью';
+            document.getElementById('content-body').innerHTML = data.content;
+
+            if (docTypeSelect) {
+                docTypeSelect.addEventListener('change', function(e) {
+                    console.log('CHANGE EVENT FIRED! Value:', e.target.value);
+                    const docTypeId = e.target.value;
+                    const subTypeSelect = document.getElementById('id_doc_sub_type');
+
+                    if (docTypeId) {
+                        console.log('Fetching subtypes for:', docTypeId);
+                        fetch(`/documentation/get-subtypes/${docTypeId}/`)
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Received subtypes:', data);
+                                subTypeSelect.innerHTML = '<option value="">Выберите подтип</option>';
+                                data.subtypes.forEach(subtype => {
+                                    const option = new Option(subtype.name, subtype.id);
+                                    subTypeSelect.add(option);
+                                });
+                            })
+                            .catch(error => console.error('Fetch error:', error));
+                    } else {
+                        subTypeSelect.innerHTML = '<option value="">Сначала выберите тип</option>';
+                    }
+                });
+            }
+
+            // ДОБАВЛЯЕМ ОБРАБОТКУ ОТПРАВКИ ФОРМЫ
+            const form = document.getElementById('addArticleForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault(); // останавливаем стандартную отправку
+                    const formData = new FormData(form);
+
+                    fetch('/documentation/add-article/', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Статья сохранена!');
+                            window.location.href = '/documentation/';
+                        } else {
+                            alert('Ошибка: ' + JSON.stringify(data.errors));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Произошла ошибка при отправке');
+                    });
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+        });
+}
+
+    function loadArticle(docTypeId, subtypeId, articleId) {
+    loadSubtypeContent(docTypeId, subtypeId);
+    // После загрузки контента найди статью и проскролль к ней
+    setTimeout(() => {
+        const articleElement = document.querySelector(`[data-article-id="${articleId}"]`);
+        if (articleElement) {
+            articleElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, 500);
+}
+
+</script>
+{% endblock %}

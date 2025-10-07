@@ -1,0 +1,27 @@
+<form method="POST" id="addArticleForm">
+    {% csrf_token %}
+
+    <div class="form-group">
+        {{ form.title.label_tag }}
+        {{ form.title }}
+    </div>
+
+    <div class="form-group">
+        {{ form.doc_type.label_tag }}
+        {{ form.doc_type }}
+    </div>
+
+    <div class="form-group">
+        {{ form.doc_sub_type.label_tag }}
+        {{ form.doc_sub_type }}
+    </div>
+
+    <div class="form-group">
+        {{ form.text.label_tag }}
+        {{ form.text }}
+    </div>
+    <div style="float: right; display: flex; gap: 12px;">
+    <button type="submit" class="btn-submit">Сохранить и закрыть</button>
+    <button type="button" class="btn-cancel" onclick="window.location.href = '/documentation/'">Отмена</button>
+    </div>
+</form>

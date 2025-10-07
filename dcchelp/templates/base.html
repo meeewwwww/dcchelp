@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DCC HELP PDH2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+<header class="header">
+    <div class="nav-container">
+        <a href="/" class="logo">DCC HELP PDH2</a>
+        <nav>
+            <ul class="menu">
+                {% for m in menu %}
+                <li><a href="{% url m.url_name %}" class="menu-link">{{ m.title }}</a></li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</header>
+<div class="search-bar">
+    <form class="search-form" action="{% url 'search' %}" method="get">
+        <input type="text"
+               name="q"
+               placeholder="Поиск по сайту"
+               class="search-input"
+               value="{{ request.GET.q }}">
+        <button type="submit" class="search-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z"
+                      stroke="currentColor" stroke-width="2"/>
+            </svg>
+        </button>
+    </form>
+</div>
+<div class="content">
+    {% block content %}
+    {% endblock %}
+</div>
+
+</td></tr></table>
+</td></tr>
+<!-- Footer -->
+<tr><td valign=top>
+    <div id="footer">
+        <p>&copy; 2025 Сайт создан в ознакомительных целях для сотрудников ТДО. Частичное или полное копирование информации с данного сайта для распространения на других ресурсах, в том числе и бумажных, строго запрещено.</p>
+    </div>
+</td></tr></table>
+<!-- Конеца footer'а и страницы -->
+</body>
+</html>

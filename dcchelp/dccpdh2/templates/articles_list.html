@@ -1,0 +1,50 @@
+{% for article in articles %}
+<div class="article-item" data-article-id="{{ article.id }}">
+    <div class="article-title">{{ article.title }}</div>
+    <div class="article-meta">
+        Создано: {{ article.created|date:"d.m.Y H:i" }} |
+        Обновлено: {{ article.updated|date:"d.m.Y H:i" }}
+    </div>
+    <div class="article-text">{{ article.text|linebreaks }}</div>
+</div>
+{% empty %}
+<div class="no-articles">
+    <p>Статьи для этого подтипа пока не добавлены</p>
+</div>
+{% endfor %}
+
+<style>
+.article-title {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    background: #f8f9fa; /* Светло-серый */
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+
+}
+
+.article-meta {
+    display: flex;
+    align-items: center;
+    padding: 0px 20px;
+    background: #f8f9fa; /* Светло-серый */
+    border-radius: 8px;
+    margin-bottom: 5px;
+    font-size: 0.8em;
+    color: #333;
+}
+
+.article-text {
+    display: flex;
+    align-items: center;
+    padding: 0px 20px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    font-size: 1em;
+    color: #333;
+}
+</style>

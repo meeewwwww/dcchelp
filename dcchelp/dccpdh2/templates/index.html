@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-grid-index">
+    <!-- Блок изменений -->
+    <div class="dashboard-card-index">
+        <div class="card-header-index">
+            <h2 class="card-title-index">Последние пункты листа изменений</h2>
+        </div>
+        <div class="changes-list-index">
+            {% for change in changes %}
+            <div class="change-item-index">
+                <span class="change-number-index">{{ change.number }}</span>
+                <a href="{% url 'list_of_changes' %}" class="change-title-index">
+                    {{ change.title }}
+                </a>
+                <span class="change-created-index">{{ change.created|date:"d.m.Y" }}</span>
+            </div>
+            {% empty %}
+            <div class="change-item-index empty-index">
+                <span>Нет изменений для отображения</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Блок статей -->
+    <div class="dashboard-card-index">
+        <div class="card-header-index">
+            <h2 class="card-title-index">Последние статьи об оформлении</h2>
+        </div>
+        <div class="changes-list-index">
+            {% for article in articles %}
+            <div class="change-item-index">
+                <span class="change-number-index">{{ article.title }}</span>
+                <a href="#" onclick="loadArticle({{ article.doc_type_id }}, {{ article.doc_sub_type_id }}, {{ article.id }})" class="change-title-index">
+                    {{ article.title }}
+                </a>
+                <span class="change-created-index">{{ article.created|date:"d.m.Y" }}</span>
+            </div>
+            {% empty %}
+            <div class="change-item-index empty-index">
+                <span>Нет изменений для отображения</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="dashboard-card-index empty-card-index">
+        <div class="card-header-index">
+            <h2 class="card-title-index">Ваш раздел</h2>
+        </div>
+        <div class="card-content-index">
+            <p>Здесь будет ваш контент</p>
+        </div>
+    </div>
+
+    <div class="dashboard-card-index empty-card-index">
+        <div class="card-header-index">
+            <h2 class="card-title-index">Ваш раздел</h2>
+        </div>
+        <div class="card-content-index">
+            <p>Здесь будет ваш контент</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
