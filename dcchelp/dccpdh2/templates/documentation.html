@@ -154,14 +154,15 @@
 .highlighted-article {
     background: #f0f0f0 !important;
     border-radius: 8px !important;
-    outline: 2px solid #A46BC2 !important; /* ← outline вместо border */
+    outline: 2px solid #CCACDD !important; /* ← outline вместо border */
     outline-offset: -2px !important; /* ← убираем отступ наружу */
-    transition: all 0.5s ease-in-out !important; /* ← добавить плавность */
+    transition: all 0s ease-in-out;
 }
 
 .highlighted-article.fade-out {
     background: transparent !important;
     outline: 2px solid transparent !important;
+    transition: all 0.5s ease-in-out !important; /* ← добавить и для исчезновения */
 }
 </style>
 
@@ -282,15 +283,14 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
         const articleElement = document.querySelector(`[data-article-id="${articleId}"]`);
         if (articleElement) {
-            articleElement.classList.add('highlighted-article');
+            articleElement.classList.add('highlighted-article'); // сразу добавляем
             articleElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            // Плавное исчезновение
             setTimeout(() => {
                 articleElement.classList.add('fade-out');
                 setTimeout(() => {
                     articleElement.classList.remove('highlighted-article', 'fade-out');
-                }, 500); // время должно совпадать с transition
+                }, 500);
             }, 4500);
         }
     }, 1000);
