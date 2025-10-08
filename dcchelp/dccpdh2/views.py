@@ -7,39 +7,30 @@ from django.views.generic import ListView, TemplateView, CreateView, DeleteView
 
 from .forms import DocumentArticleForm, ChangeForm
 from .models import Tag, Change, DocumentTypes, DocumentArticle, DocumentSubType, FAQ
-
-
-menu = [
-    {'title': 'Главная', 'url_name': 'home'},
-    {'title': 'Процедуры', 'url_name': 'procedures'}, # Подумать над целесообразностью раздела
-    {'title': 'Лист изменений', 'url_name': 'list_of_changes'},
-    {'title': 'Оформление документации', 'url_name': 'documentation'},
-    {'title': 'Запуск процессов', 'url_name': 'processes'}, # Подумать над целесообразностью раздела
-    {'title': 'FAQ', 'url_name': 'FAQ'},
-]
+from .utils import DataMixin
 
 
 # Главная страница. +Дополнить еще двумя разделами для отображения
-class IndexView(TemplateView):
+class IndexView(DataMixin, TemplateView):
     template_name = 'index.html'
+    title = 'Главная страница'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        changes = Change.objects.all()[:4]
-        articles = DocumentArticle.objects.order_by('-created').all()[:2]
-        context.update({
-            'menu': menu,
-            'changes': changes,
-            'articles': articles,
-        })
-        return context
+        return self.get_mixin_context(context,
+                                      changes=Change.objects.all()[:4],
+                                      articles=DocumentArticle.objects.order_by('-created').all()[:4])
 
 
 # Раздел листа изменений
-class ListOfChangesView(ListView):
+class ListOfChangesView(DataMixin, ListView):
     template_name = 'list_of_changes.html'
     context_object_name = 'changes'
-    extra_context = {'menu': menu}
+    title = 'Лист изменений'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return self.get_mixin_context(context)
 
     def get_queryset(self):
         return Change.objects.all()
@@ -91,15 +82,17 @@ def delete_change(request, change_id):
         return JsonResponse({'success': True})
 
 
-def documentation(request):
-    document_types = DocumentTypes.objects.prefetch_related('sub_types').all()
-    data = {
-        'menu': menu,
-        'document_types': document_types,
-    }
-    return render(request, 'documentation.html', context=data)
+class DocumentationView(DataMixin, TemplateView):
+    template_name = 'documentation.html'
+    title = 'Оформление документации'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return self.get_mixin_context(context,
+                                      document_types=DocumentTypes.objects.prefetch_related('sub_types').all())
 
 
+# Реализована функция, т.к. используется AJAX (обновление данных на странице без обновления самой страницы)
 def get_documentation_content(request, doc_type_id, subtype_id=None):
     if subtype_id:
         articles = DocumentArticle.objects.filter(
@@ -124,6 +117,7 @@ def get_documentation_content(request, doc_type_id, subtype_id=None):
         })
 
 
+# Реализована функция, т.к. используется AJAX (обновление данных на странице без обновления самой страницы)
 def add_document_article(request):
     if request.method == 'POST':
         form = DocumentArticleForm(request.POST)
@@ -148,6 +142,7 @@ def add_document_article(request):
         })
 
 
+# Реализована функция, т.к. используется AJAX (обновление данных на странице без обновления самой страницы)
 def get_subtypes(request, doc_type_id):
     try:
         doc_type = DocumentTypes.objects.get(id=doc_type_id)
@@ -157,10 +152,14 @@ def get_subtypes(request, doc_type_id):
         return JsonResponse({'subtypes': []})
 
 
-class FAQView(ListView):
+class FAQView(DataMixin, ListView):
     template_name = 'faq.html'
     context_object_name = 'qas'
-    extra_context = {'menu': menu}
+    title = 'FAQ'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return self.get_mixin_context(context)
 
     def get_queryset(self):
         return FAQ.objects.filter(answered=True)
@@ -190,16 +189,20 @@ def page_not_found(request, exception):
 
 
 # Подумать над целесообразностью раздела
-def processes(request):
-    data = {
-        'menu': menu,
-    }
-    return render(request, 'base.html', context=data)
+class ProcessesView(DataMixin, TemplateView):
+    template_name = 'base.html'
+    title = 'Запуск процессов'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return self.get_mixin_context(context)
 
 
 # Подумать над целесообразностью раздела
-def procedures(request):
-    data = {
-        'menu': menu,
-    }
-    return render(request, 'base.html', context=data)
+class ProceduresView(DataMixin, TemplateView):
+    template_name = 'base.html'
+    title = 'Процедуры'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return self.get_mixin_context(context)

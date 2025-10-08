@@ -32,8 +32,13 @@
         <div class="changes-list-index">
             {% for article in articles %}
             <div class="change-item-index">
-                <span class="change-number-index">{{ article.title }}</span>
-                <a href="#" onclick="loadArticle({{ article.doc_type_id }}, {{ article.doc_sub_type_id }}, {{ article.id }})" class="change-title-index">
+                <a href="/documentation/"
+                   onclick="sessionStorage.setItem('loadArticleData', JSON.stringify({
+                     docTypeId: {{ article.doc_type_id }},
+                     subtypeId: {{ article.doc_sub_type_id }},
+                     articleId: {{ article.id }}
+                   }))"
+                   class="change-title-index">
                     {{ article.title }}
                 </a>
                 <span class="change-created-index">{{ article.created|date:"d.m.Y" }}</span>
@@ -45,7 +50,7 @@
             {% endfor %}
         </div>
     </div>
-
+    <!-- Пустой -->
     <div class="dashboard-card-index empty-card-index">
         <div class="card-header-index">
             <h2 class="card-title-index">Ваш раздел</h2>
@@ -54,7 +59,7 @@
             <p>Здесь будет ваш контент</p>
         </div>
     </div>
-
+    <!-- Пустой -->
     <div class="dashboard-card-index empty-card-index">
         <div class="card-header-index">
             <h2 class="card-title-index">Ваш раздел</h2>

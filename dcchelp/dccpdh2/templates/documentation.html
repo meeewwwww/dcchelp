@@ -150,6 +150,19 @@
 .add-article-btn:hover {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
+
+.highlighted-article {
+    background: #f0f0f0 !important;
+    border-radius: 8px !important;
+    outline: 2px solid #A46BC2 !important; /* ← outline вместо border */
+    outline-offset: -2px !important; /* ← убираем отступ наружу */
+    transition: all 0.5s ease-in-out !important; /* ← добавить плавность */
+}
+
+.highlighted-article.fade-out {
+    background: transparent !important;
+    outline: 2px solid transparent !important;
+}
 </style>
 
 <script>
@@ -181,6 +194,8 @@ function openArticleForm() {
         .then(data => {
             document.getElementById('content-title').textContent = 'Добавить статью';
             document.getElementById('content-body').innerHTML = data.content;
+
+            const docTypeSelect = document.getElementById('id_doc_type');
 
             if (docTypeSelect) {
                 docTypeSelect.addEventListener('change', function(e) {
@@ -252,6 +267,35 @@ function openArticleForm() {
         }
     }, 500);
 }
+
+// При загрузке страницы documentation
+document.addEventListener('DOMContentLoaded', function() {
+    const articleData = sessionStorage.getItem('loadArticleData');
+    if (articleData) {
+        const { docTypeId, subtypeId, articleId } = JSON.parse(articleData);
+        sessionStorage.removeItem('loadArticleData');
+
+        // Загружаем статьи подкатегории
+        loadSubtypeContent(docTypeId, subtypeId);
+
+        // Скроллим к конкретной статье
+        setTimeout(() => {
+        const articleElement = document.querySelector(`[data-article-id="${articleId}"]`);
+        if (articleElement) {
+            articleElement.classList.add('highlighted-article');
+            articleElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Плавное исчезновение
+            setTimeout(() => {
+                articleElement.classList.add('fade-out');
+                setTimeout(() => {
+                    articleElement.classList.remove('highlighted-article', 'fade-out');
+                }, 500); // время должно совпадать с transition
+            }, 4500);
+        }
+    }, 1000);
+    }
+});
 
 </script>
 {% endblock %}

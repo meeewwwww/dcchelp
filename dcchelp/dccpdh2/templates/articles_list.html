@@ -1,9 +1,13 @@
 {% for article in articles %}
 <div class="article-item" data-article-id="{{ article.id }}">
-    <div class="article-title">{{ article.title }}</div>
-    <div class="article-meta">
-        Создано: {{ article.created|date:"d.m.Y H:i" }} |
-        Обновлено: {{ article.updated|date:"d.m.Y H:i" }}
+    <div class="article-title">
+      <div class="article-content">
+        <div class="article-main">{{ article.title }}</div>
+        <div class="article-meta">
+          <span>Создано: {{ article.created|date:"d.m.Y H:i" }}</span> |
+          <span>Обновлено: {{ article.updated|date:"d.m.Y H:i" }}</span>
+        </div>
+      </div>
     </div>
     <div class="article-text">{{ article.text|linebreaks }}</div>
 </div>
@@ -23,19 +27,15 @@
     margin-bottom: 10px;
     font-size: 1.2em;
     font-weight: bold;
-    color: #333;
+    color: #422253;
 
 }
 
 .article-meta {
-    display: flex;
-    align-items: center;
-    padding: 0px 20px;
-    background: #f8f9fa; /* Светло-серый */
-    border-radius: 8px;
-    margin-bottom: 5px;
-    font-size: 0.8em;
+    align-items: right;
+    font-size: 0.6em;
     color: #333;
+    font-weight: lighter;
 }
 
 .article-text {
