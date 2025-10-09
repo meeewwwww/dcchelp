@@ -11,7 +11,11 @@
             {% for change in changes %}
             <div class="change-item-index">
                 <span class="change-number-index">{{ change.number }}</span>
-                <a href="{% url 'list_of_changes' %}" class="change-title-index">
+                <a href="/list_of_changes/"
+                   onclick="sessionStorage.setItem('loadChangeData', JSON.stringify({
+                     changeId: {{ change.id }}
+                   }))"
+                   class="change-title-index">
                     {{ change.title }}
                 </a>
                 <span class="change-created-index">{{ change.created|date:"d.m.Y" }}</span>

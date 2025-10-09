@@ -120,6 +120,7 @@ def get_documentation_content(request, doc_type_id, subtype_id=None):
 # Реализована функция, т.к. используется AJAX (обновление данных на странице без обновления самой страницы)
 def add_document_article(request):
     if request.method == 'POST':
+        print("POST данные:", request.POST)  # ← что приходит
         form = DocumentArticleForm(request.POST)
         if 'doc_type' in request.POST:
             try:

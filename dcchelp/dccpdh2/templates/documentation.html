@@ -189,12 +189,51 @@ function loadSubtypeContent(docTypeId, subtypeId) {
         });
 }
 
+// ПОДКЛЮЧАЕМ CKEDITOR ДИНАМИЧЕСКИ
 function openArticleForm() {
+    if (!window.ClassicEditor) {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js';
+        script.onload = function() {
+            loadArticleForm();
+        };
+        document.head.appendChild(script);
+    } else {
+        loadArticleForm();
+    }
+}
+
+function loadArticleForm() {
     fetch('/documentation/add-article/')
         .then(response => response.json())
         .then(data => {
             document.getElementById('content-title').textContent = 'Добавить статью';
             document.getElementById('content-body').innerHTML = data.content;
+
+            setTimeout(() => {
+                const textarea = document.getElementById('id_text');
+                if (textarea && window.ClassicEditor) {
+                    ClassicEditor
+                        .create(textarea, {
+                            // КОНФИГ ДЛЯ BASE64
+                            image: {
+                                upload: {
+                                    types: ['jpeg', 'png', 'jpg', 'gif']
+                                }
+                            },
+                            simpleUpload: {
+                                uploadUrl: null  // используем Base64 вместо загрузки на сервер
+                            }
+                        })
+                        .then(editor => {
+                            console.log('CKEditor создан!', editor);
+                            window.articleEditor = editor;
+                        })
+                        .catch(error => {
+                            console.error('CKEditor error:', error);
+                        });
+                }
+            }, 100);
 
             const docTypeSelect = document.getElementById('id_doc_type');
 
@@ -227,14 +266,25 @@ function openArticleForm() {
             const form = document.getElementById('addArticleForm');
             if (form) {
                 form.addEventListener('submit', function(e) {
-                    e.preventDefault(); // останавливаем стандартную отправку
+                    e.preventDefault();
+
+                    // ОБЯЗАТЕЛЬНО обновить textarea данными из редактора
+                    if (window.articleEditor) {
+                        const editorData = window.articleEditor.getData();
+                        const textarea = document.getElementById('id_text'); // ← ПЕРЕМЕСТИ СЮДА
+                        textarea.value = editorData;
+                        console.log("Textarea обновлен:", textarea.value);
+                    }
+
                     const formData = new FormData(form);
+                    console.log("Отправляемые данные:", Array.from(formData.entries()));
 
                     fetch('/documentation/add-article/', {
                         method: 'POST',
                         body: formData,
                         headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                         }
                     })
                     .then(response => response.json())
@@ -258,7 +308,7 @@ function openArticleForm() {
         });
 }
 
-    function loadArticle(docTypeId, subtypeId, articleId) {
+function loadArticle(docTypeId, subtypeId, articleId) {
     loadSubtypeContent(docTypeId, subtypeId);
     // После загрузки контента найди статью и проскролль к ней
     setTimeout(() => {

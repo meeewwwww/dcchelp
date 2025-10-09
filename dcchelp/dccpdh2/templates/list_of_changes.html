@@ -9,7 +9,7 @@
     </button><br>
     {% include 'to_include/add_change.html' %}
     {% for change in changes %}
-    <div class="change-item">
+    <div class="change-item" data-change-id="{{ change.id }}">
         <div class="change-header">
             <span class="arrow">▶</span>
             <h2 class="change-title">{{ change.number }}. {{ change.title }}</h2>
@@ -50,7 +50,21 @@
     {% endfor %}
 </div>
 {% endautoescape %}
+<style>
+    .highlighted-change {
+    background: #f8f0ff !important;
+    border-radius: 8px !important;
+    outline: 2px solid #A46BC2 !important;
+    outline-offset: -2px !important;
+    transition: all 0s ease-in-out !important;
+}
 
+.highlighted-change.fade-out {
+    background: transparent !important;
+    outline: 2px solid transparent !important;
+    transition: all 0.5s ease-in-out !important;
+}
+</style>
 <script>
 let currentEditingId = null;
 
@@ -142,6 +156,34 @@ if (form) {
     }
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    const changeData = sessionStorage.getItem('loadChangeData');
+    if (changeData) {
+        const { changeId } = JSON.parse(changeData);
+        sessionStorage.removeItem('loadChangeData');
+
+        // Скроллим к изменению
+        setTimeout(() => {
+            const changeElement = document.querySelector(`[data-change-id="${changeId}"]`);
+            if (changeElement) {
+                changeElement.classList.add('highlighted-change');
+                changeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Автоматически разворачиваем изменение
+                changeElement.classList.add('active');
+
+                // Убираем подсветку
+                setTimeout(() => {
+                    changeElement.classList.add('fade-out');
+                    setTimeout(() => {
+                        changeElement.classList.remove('highlighted-change', 'fade-out');
+                    }, 500);
+                }, 4500);
+            }
+        }, 100);
+    }
+});
+
 // Редактирование изменения
 function editChange(changeId) {
     fetch(`/change/${changeId}/edit/`)
@@ -196,6 +238,8 @@ function deleteChange(changeId) {
         })
         .catch(error => console.error('Ошибка:', error));
     }
+
 }
+
 </script>
 {% endblock %}

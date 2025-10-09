@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django_ckeditor_5.fields import CKEditor5Field
 
 
 class FAQ(models.Model):
@@ -88,7 +89,7 @@ class DocumentSubType(models.Model):
 
 class DocumentArticle(models.Model):
     title = models.CharField(max_length=255)
-    text = models.TextField()
+    text = CKEditor5Field('Text', config_name='extends')
     doc_type = models.ForeignKey('DocumentTypes', on_delete=models.CASCADE, related_name='articles')
     doc_sub_type = models.ForeignKey('DocumentSubType', on_delete=models.CASCADE, related_name='articles')
     created = models.DateTimeField(auto_now_add=True)

@@ -9,7 +9,7 @@
         </div>
       </div>
     </div>
-    <div class="article-text">{{ article.text|linebreaks }}</div>
+    <div class="article-text">{{ article.text|safe }}</div>
 </div>
 {% empty %}
 <div class="no-articles">
@@ -39,7 +39,6 @@
 }
 
 .article-text {
-    display: flex;
     align-items: center;
     padding: 0px 20px;
     border-radius: 8px;
