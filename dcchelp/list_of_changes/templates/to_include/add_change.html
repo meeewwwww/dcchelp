@@ -5,7 +5,7 @@
             <span class="close" onclick="closeModal()">&times;</span>
         </div>
         <div class="modal-body">
-            <form method="POST" action="{% url 'add_change' %}" id="changeForm">
+            <form method="POST" action="/list_of_changes/add/" id="changeForm">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="number">Номер изменения:</label>
@@ -33,7 +33,7 @@
 
                 <div class="form-group">
                     <label for="link_approvement">Ссылка на согласование:</label>
-                    <input type="url" id="link_approvement" name="link_approvement">
+                    <input type="text" id="link_approvement" name="link_approvement" placeholder="https://example.com или example.com">
                 </div>
 
                 <div class="form-actions">

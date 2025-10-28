@@ -1,5 +1,4 @@
 from django.db import models
-from django.urls import reverse
 from django_ckeditor_5.fields import CKEditor5Field
 
 
@@ -7,30 +6,6 @@ class FAQ(models.Model):
     question = models.CharField(max_length=255)
     answer = models.TextField(max_length=1000, blank=True, default='Ответа пока что нет...')
     answered = models.BooleanField(default=False)
-
-
-class Change(models.Model):
-    class Status(models.IntegerChoices):
-        ACTIVE = 1, 'Актуален'
-        CANCELLED = 0, 'Отменен'
-
-    number = models.IntegerField()
-    title = models.CharField(max_length=255, verbose_name='Название')
-    text = models.TextField(max_length=1000, blank=True, verbose_name='Содержание')
-    created = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
-    updated = models.DateTimeField(auto_now=True, verbose_name='Изменено')
-    active = models.BooleanField(choices=tuple(map(lambda x: (bool(x[0]), x[1]), Status.choices)),
-                                 default=Status.ACTIVE, verbose_name='Статус')
-    link_approvement = models.URLField(blank=True, verbose_name='Ссылка на согласование')
-    tags = models.ManyToManyField('Tag', related_name='change', blank=True, verbose_name='Теги') #возможно не будет использоваться - удалить
-
-    class Meta:
-        ordering = ['-number']
-        verbose_name = 'Изменение'
-        verbose_name_plural = 'Изменения'
-
-    def __str__(self):
-        return self.title
 
 
 # Подумать над целесообразностью модели/раздела
@@ -47,11 +22,12 @@ class Procedure(models.Model):
 
 # Подумать над целесообразностью модели
 class Tag(models.Model):
+    class Statuses(models.TextChoices):
+        ASAP = 'As soons as possbile'
+        BRB = 'Be right back'
+        TTL = 'Talk to you later'
     name = models.CharField(max_length=100, db_index=True)
-    slug = models.SlugField(unique=True, db_index=True)
-
-    def get_absolute_url(self):
-        return reverse('tag', kwargs={'tag_slug': self.slug})
+    slug = models.SlugField(unique=True, choices=Statuses)
 
     def __str__(self):
         return self.name

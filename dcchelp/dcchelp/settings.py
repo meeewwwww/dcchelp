@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'dccpdh2.apps.Dccpdh2Config',
+    'list_of_changes.apps.ListOfChangesConfig',
     'debug_toolbar',
     'django_ckeditor_5',
 ]
@@ -166,9 +167,9 @@ customColorPalette = [
 CKEDITOR_5_CONFIGS = {
     'default': {
         'toolbar': {
-            'items': ['heading', '|', 'bold', 'italic', 'link',
+            'items': ['heading', '|', 'bold', 'italic', 'underline', 'link',
                       'bulletedList', 'numberedList', 'blockQuote',
-                      'imageUpload'],  # оставляем imageUpload
+                      'imageUpload'],
         },
         'image': {
             'toolbar': ['imageTextAlternative', '|', 'imageStyle:inline', 'imageStyle:block', 'imageStyle:side'],

@@ -1,21 +1,7 @@
 from django import forms
 from django_ckeditor_5.widgets import CKEditor5Widget
 
-from .models import DocumentArticle, DocumentSubType, DocumentTypes, Change
-
-
-class ChangeForm(forms.ModelForm):
-    class Meta:
-        model = Change
-        fields = ['number', 'title', 'text', 'link_approvement']
-
-    def clean_text(self):
-        text = self.cleaned_data.get('text', '').strip()
-        empty_values = ['', '<br>', '<p></p>', '<div><br></div>', '<p><br></p>']
-
-        if not text or text in empty_values:
-            raise forms.ValidationError('Описание изменения обязательно')
-        return text
+from .models import DocumentArticle, DocumentSubType, DocumentTypes
 
 
 class DocumentArticleForm(forms.ModelForm):
@@ -35,7 +21,7 @@ class DocumentArticleForm(forms.ModelForm):
         }
         widgets = {
             "text": CKEditor5Widget(
-                  attrs={"class": "django_ckeditor_5"}, config_name="extends"
+                  attrs={"class": "django_ckeditor_5"}, config_name="default"
               )
         }
 

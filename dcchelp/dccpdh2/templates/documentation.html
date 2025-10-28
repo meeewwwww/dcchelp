@@ -164,6 +164,135 @@
     outline: 2px solid transparent !important;
     transition: all 0.5s ease-in-out !important; /* ← добавить и для исчезновения */
 }
+
+/* Кнопки тулбара */
+.ck.ck-toolbar {
+    background: #5C2F74;
+    border: 1px solid #422253 !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 4px 8px !important;
+}
+
+.ck.ck-button {
+    color: white !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.ck.ck-button:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+.ck.ck-button:active,
+.ck.ck-button.ck-on {
+    background: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.ck.ck-label {
+    display: none !important;
+}
+
+/* Разделители */
+.ck.ck-toolbar .ck-toolbar__separator {
+    background: rgba(255,  255, 255, 0.3) !important;
+}
+
+/* Поле ввода текста */
+.ck.ck-editor__editable {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0 0 8px 8px !important;
+    border-top: none !important;
+    min-height: 300px !important;
+    padding: 16px !important;
+    transition: border-color 0.3s ease !important;
+}
+
+/* Фокус на поле ввода */
+.ck.ck-editor__editable.ck-focused {
+    border-color: #904AB5 !important;
+    box-shadow: 0 0 0 2px rgba(144, 74, 181, 0.2) !important;
+    outline: none !important;
+}
+
+/* Вся форма с закругленными краями */
+#addArticleForm {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 12px rgba(66, 34, 83, 0.1) !important;
+}
+
+/* Группы полей формы */
+.form-group {
+    margin-bottom: 20px !important;
+}
+
+.form-group label {
+    font-weight: 600 !important;
+    color: #422253 !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+}
+
+/* Поля ввода формы */
+#addArticleForm input,
+#addArticleForm select {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 6px !important;
+    padding: 10px 12px !important;
+    width: 100% !important;
+    transition: border-color 0.3s ease !important;
+}
+
+#addArticleForm input:focus,
+#addArticleForm select:focus {
+    border-color: #904AB5 !important;
+    box-shadow: 0 0 0 2px rgba(144, 74, 181, 0.2) !important;
+    outline: none !important;
+}
+
+/* Выпадающие списки */
+/* Выпадающие списки CKEditor */
+.ck.ck-dropdown__panel {
+    border: 1px solid #422253 !important;
+    border-radius: 6px !important;
+    background: white !important;
+}
+
+/* Текст в выпадающих списках */
+.ck.ck-list__item .ck-button {
+    color: #422253 !important;
+    background: white !important;
+}
+
+.ck.ck-list__item .ck-button:hover {
+    background: #f8f9fa !important;
+    color: #422253 !important;
+}
+
+/* Активный элемент в списке */
+.ck.ck-list__item .ck-button.ck-on {
+    background: #904AB5 !important;
+    color: white !important;
+}
+
+/* Текст в инпутах */
+.ck.ck-input-text {
+    color: #422253 !important;
+    background: white !important;
+}
+
+/* Подсказки/лейблы в формах редактора */
+.ck.ck-labeled-field-view .ck-labeled-field-view__label {
+    color: #422253 !important;
+}
+
+/* Иконки в выпадающих списках */
+.ck.ck-icon {
+    color: white !important;
+}
 </style>
 
 <script>
@@ -203,6 +332,27 @@ function openArticleForm() {
     }
 }
 
+class MyUploadAdapter {
+    constructor(loader) {
+        this.loader = loader;
+    }
+
+    upload() {
+        return this.loader.file.then(file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                resolve({ default: reader.result });
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        }));
+    }
+
+    abort() {
+        // Base64 не поддерживает отмену
+    }
+}
+
 function loadArticleForm() {
     fetch('/documentation/add-article/')
         .then(response => response.json())
@@ -211,29 +361,38 @@ function loadArticleForm() {
             document.getElementById('content-body').innerHTML = data.content;
 
             setTimeout(() => {
-                const textarea = document.getElementById('id_text');
-                if (textarea && window.ClassicEditor) {
-                    ClassicEditor
-                        .create(textarea, {
-                            // КОНФИГ ДЛЯ BASE64
-                            image: {
-                                upload: {
-                                    types: ['jpeg', 'png', 'jpg', 'gif']
-                                }
-                            },
-                            simpleUpload: {
-                                uploadUrl: null  // используем Base64 вместо загрузки на сервер
-                            }
-                        })
-                        .then(editor => {
-                            console.log('CKEditor создан!', editor);
-                            window.articleEditor = editor;
-                        })
-                        .catch(error => {
-                            console.error('CKEditor error:', error);
-                        });
-                }
-            }, 100);
+            const textarea = document.getElementById('id_text');
+            if (textarea && window.ClassicEditor) {
+                ClassicEditor
+                .create(textarea, {
+                    ckfinder: {
+                        uploadUrl: null
+                    },
+                    toolbar: {
+                        items: [
+                            'undo', 'redo',
+                            '|',
+                            'heading',
+                            '|',
+                            'bold', 'italic', 'underline',
+                            '|',
+                            'bulletedList', 'numberedList', 'blockQuote',
+                            '|',
+                            'insertTable', 'imageUpload',
+                        ],
+                        shouldNotGroupWhenFull: true
+                    }
+                })
+                .then(editor => {
+                    // Явно включаем Base64 адаптер
+                    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                        return new MyUploadAdapter(loader);
+                    };
+                    console.log('CKEditor создан!', editor);
+                    window.articleEditor = editor;
+                })
+            }
+        }, 100);
 
             const docTypeSelect = document.getElementById('id_doc_type');
 
