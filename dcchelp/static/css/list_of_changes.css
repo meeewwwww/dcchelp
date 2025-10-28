@@ -90,10 +90,11 @@
 }
 
 .change-content {
-    max-height: 83px;
+    max-height: 82px;
     overflow: hidden;
     padding: 0 20px;
     transition: max-height 0.5s ease;
+    display: block;
 }
 
 .change-item.active .change-content {
