@@ -57,6 +57,16 @@
     padding: 0px;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    flex: 1;
+}
+
 body {
     font-family: 'Roboto', 'Arial', sans-serif;
     font-weight: 400;
@@ -66,7 +76,12 @@ body {
     margin: 0;
     padding: 0;
     background: white; /* Явно задаем белый фон для body */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
+
+
 
 /* Стили поиска */
 .search-bar {
