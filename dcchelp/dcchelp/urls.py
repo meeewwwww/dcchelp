@@ -10,6 +10,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('dccpdh2.urls')),
     path('', include('list_of_changes.urls')),
+    path('', include('tasks.urls')),
 ] + debug_toolbar_urls()
 
 handler404 = page_not_found

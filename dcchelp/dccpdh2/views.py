@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, TemplateView, CreateView, DeleteView
 
 from .forms import DocumentArticleForm
-from .models import Tag, DocumentTypes, DocumentArticle, DocumentSubType, FAQ
+from .models import DocumentTypes, DocumentArticle, DocumentSubType, FAQ
 from .utils import DataMixin
 from list_of_changes.models import Change
 
@@ -128,23 +128,3 @@ def search(request):
 def page_not_found(request, exception):
     text = '''Woops! Страница не найдена.'''
     return HttpResponseServerError(text)
-
-
-# Подумать над целесообразностью раздела
-class ProcessesView(DataMixin, TemplateView):
-    template_name = 'base.html'
-    title = 'Запуск процессов'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return self.get_mixin_context(context)
-
-
-# Подумать над целесообразностью раздела
-class ProceduresView(DataMixin, TemplateView):
-    template_name = 'base.html'
-    title = 'Процедуры'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return self.get_mixin_context(context)

@@ -485,24 +485,40 @@ document.addEventListener('DOMContentLoaded', function() {
         const { docTypeId, subtypeId, articleId } = JSON.parse(articleData);
         sessionStorage.removeItem('loadArticleData');
 
-        // Загружаем статьи подкатегории
-        loadSubtypeContent(docTypeId, subtypeId);
-
-        // Скроллим к конкретной статье
+        // Скроллим сразу, не ждем загрузки контента
         setTimeout(() => {
-        const articleElement = document.querySelector(`[data-article-id="${articleId}"]`);
-        if (articleElement) {
-            articleElement.classList.add('highlighted-article'); // сразу добавляем
-            articleElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const articleElement = document.querySelector(`[data-article-id="${articleId}"]`);
+            if (articleElement) {
+                articleElement.classList.add('highlighted-article');
+                articleElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            setTimeout(() => {
-                articleElement.classList.add('fade-out');
                 setTimeout(() => {
-                    articleElement.classList.remove('highlighted-article', 'fade-out');
-                }, 500);
-            }, 4500);
-        }
-    }, 1000);
+                    articleElement.classList.add('fade-out');
+                    setTimeout(() => {
+                        articleElement.classList.remove('highlighted-article', 'fade-out');
+                    }, 500);
+                }, 4500);
+            } else {
+                // Если элемент не найден, пробуем через 300ms (после загрузки контента)
+                setTimeout(() => {
+                    const articleElement = document.querySelector(`[data-article-id="${articleId}"]`);
+                    if (articleElement) {
+                        articleElement.classList.add('highlighted-article');
+                        articleElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                        setTimeout(() => {
+                            articleElement.classList.add('fade-out');
+                            setTimeout(() => {
+                                articleElement.classList.remove('highlighted-article', 'fade-out');
+                            }, 500);
+                        }, 4500);
+                    }
+                }, 300);
+            }
+        }, 100);
+
+        // Загружаем контент отдельно
+        loadSubtypeContent(docTypeId, subtypeId);
     }
 });
 

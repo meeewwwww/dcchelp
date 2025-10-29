@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'dccpdh2.apps.Dccpdh2Config',
     'list_of_changes.apps.ListOfChangesConfig',
+    'tasks.apps.TasksConfig',
     'debug_toolbar',
     'django_ckeditor_5',
 ]
