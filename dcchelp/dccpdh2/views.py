@@ -45,7 +45,8 @@ def get_documentation_content(request, doc_type_id, subtype_id=None):
 
         content = render_to_string('articles_list.html', {
             'articles': articles,
-            'doc_type_name': doc_type.ru_name
+            'doc_type_name': doc_type.ru_name,
+            'subtype_name': subtype.name
         })
 
         return JsonResponse({
