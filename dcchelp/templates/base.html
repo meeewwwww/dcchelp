@@ -22,7 +22,7 @@
         </nav>
     </div>
 </header>
-<main>
+
 <div class="search-bar">
     <form class="search-form" action="{% url 'search' %}" method="get">
         <input type="text"
@@ -38,20 +38,16 @@
         </button>
     </form>
 </div>
-<div class="content">
+
+<main class="content">
     {% block content %}
     {% endblock %}
+</main>
+
+<!-- Footer -->
+<div id="footer">
+    <p>&copy; 2025 Сайт создан в ознакомительных целях для сотрудников ТДО. Частичное или полное копирование информации с данного сайта для распространения на других ресурсах, в том числе и бумажных, строго запрещено.</p>
 </div>
 
-</td></tr></table>
-</td></tr>
-</main>
-<!-- Footer -->
-<tr><td valign=top>
-    <div id="footer">
-        <p>&copy; 2025 Сайт создан в ознакомительных целях для сотрудников ТДО. Частичное или полное копирование информации с данного сайта для распространения на других ресурсах, в том числе и бумажных, строго запрещено.</p>
-    </div>
-</td></tr></table>
-<!-- Конеца footer'а и страницы -->
 </body>
 </html>

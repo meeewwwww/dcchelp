@@ -55,6 +55,9 @@
 .content {
     margin-top: 0px;
     padding: 0px;
+    flex: 1; /* ← ДОБАВИТЬ */
+    display: flex;
+    flex-direction: column;
 }
 
 html, body {
@@ -64,7 +67,9 @@ html, body {
 }
 
 main {
-    flex: 1;
+    flex: 0 1 auto;
+    padding-bottom: 50px;
+    z-index: 1;
 }
 
 body {
@@ -131,12 +136,11 @@ body {
 .dashboard-grid-index {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-auto-rows: minmax(250px, 1fr);
     gap: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
+    margin: 0 150px;
     padding: 20px;
-    min-height: 600px;
+    padding-bottom: 60px;
 }
 
 .dashboard-card-index {
@@ -274,6 +278,7 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px 20px;
+    padding: 20px 20px 60px; /* ← ДОБАВИТЬ снизу */
 }
 
 .faq-item {
@@ -499,13 +504,16 @@ form {
 
 /* Стили footer'а */
 #footer {
+    flex-shrink: 0;
     box-sizing: border-box;
-    padding: 3px;
+    padding: 5px;
     color: #E8DAEF; /* Более светлый оттенок для лучшей читаемости */
     font-size: 12px;
     text-align: left;
     background: #422253;
     overflow: hidden;
+    position: relative; /* ← ДОБАВИТЬ */
+    z-index: 10; /* ← ДОБАВИТЬ */
 }
 
 /* Адаптивность для главной страницы */

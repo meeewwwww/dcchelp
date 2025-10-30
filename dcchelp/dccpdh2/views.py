@@ -41,12 +41,18 @@ def get_documentation_content(request, doc_type_id, subtype_id=None):
             doc_sub_type_id=subtype_id
         ).order_by('-created')
         subtype = DocumentSubType.objects.get(id=subtype_id)
-        content = render_to_string('articles_list.html', {'articles': articles})
+        doc_type = DocumentTypes.objects.get(id=doc_type_id)
+
+        content = render_to_string('articles_list.html', {
+            'articles': articles,
+            'doc_type_name': doc_type.ru_name
+        })
 
         return JsonResponse({
             'title': f'{subtype.name}',
             'content': content
         })
+
     else:
         doc_type = get_object_or_404(DocumentTypes, id=doc_type_id)
         articles = DocumentArticle.objects.filter(doc_type_id=doc_type_id)
