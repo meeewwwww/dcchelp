@@ -11,7 +11,7 @@
     <button class="add-change-btn" onclick="openModal()" title="Добавить новое изменение">
         <span>+</span>
     </button><br>
-    {% include 'to_include/add_change.html' %}
+
     {% for change in changes %}
     <div class="change-item" data-change-id="{{ change.id }}">
         <div class="change-header">
@@ -72,4 +72,7 @@
 }
 </style>
 
+{% endblock %}
+{% block modal %}
+{% include 'to_include/add_change.html' %}
 {% endblock %}

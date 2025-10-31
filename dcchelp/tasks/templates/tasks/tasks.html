@@ -5,19 +5,21 @@
 <div class="tasks-container">
     <!-- Форма добавления -->
     <div class="add-task-section">
+        <p class="add-task-title">Добавить новую задачу:</p>
         <form method="post" id="addTaskForm" action="{% url 'add_task' %}">
             {% csrf_token %}
             <table class="tasks-table" id="addTaskTable">
                 <thead>
                     <tr>
-                        <th>Номер заявки</th>
+                        <th>Номер заявки, PVA, TRM</th>
                         <th>Время получения</th>
-                        <th>Наименование</th>
+                        <th>Наименование комплекта</th>
                         <th>Приоритет</th>
                         <th>Итерация</th>
                         <th>Статус</th>
-                        <th>Сотрудник</th>
-                        <th>Результат</th>
+                        <th>Завершено</th>
+                        <th>Сотрудник ТДО</th>
+                        <th>Созданный процесс, TRM</th>
                         <th>Комментарий</th>
                         <th>Действия</th>
                     </tr>
@@ -25,7 +27,7 @@
                 <tbody>
                     <tr>
                         <td><input type="text" name="number" class="form-control" required></td>
-                        <td><input type="datetime-local" name="created" class="form-control" required></td>
+                        <td><input type="text" name="created" class="form-control" required></td>
                         <td><input type="text" name="name" class="form-control" required></td>
                         <td>
                             <select name="priority" class="form-control">
@@ -47,6 +49,7 @@
                                 {% endfor %}
                             </select>
                         </td>
+                        <td><input type="date" name="finished" class="form-control"></td>
                         <td>
                             <select name="user" class="form-control" required>
                                 {% for user in users %}
@@ -57,7 +60,11 @@
                         <td><input type="text" name="result" class="form-control"></td>
                         <td><textarea name="comment" class="form-control"></textarea></td>
                         <td>
-                            <button type="submit" class="btn btn-success">Сохранить</button>
+                            <button class="btn-save" title="Сохранить">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                                </svg>
+                            </button>
                         </td>
                     </tr>
                 </tbody>
@@ -68,6 +75,7 @@
     <!-- Таблица задач -->
     <div class="tasks-list">
         <table class="tasks-table" id="tasksTable">
+            <p class="tasks-title">Задачи (поступившие за последние 72 часа)</p>
             <thead>
                 <tr>
                     {% for field in form %}
@@ -83,7 +91,13 @@
                 {% for task in tasks %}
                     <tr data-task-id="{{ task.id }}">
                         <td><input type="text" name="number" value="{{ task.number }}" class="editable-field"></td>
-                        <td><input type="datetime-local" name="created" value="{{ task.created|date:'Y-m-d\TH:i' }}" class="editable-field"></td>
+                        <td>
+                            <input type="text"
+                                   name="created"
+                                   value="{{ task.created|date:'d.m.Y H:i' }}"
+                                   class="editable-field"
+                                   placeholder="30.10.2025 14:56">
+                        </td>
                         <td><input type="text" name="name" value="{{ task.name }}" class="editable-field"></td>
                         <td class="priority-cell {% if task.priority %}priority-high{% endif %}">
                             <select name="priority" class="editable-field">
@@ -105,22 +119,34 @@
                                 {% endfor %}
                             </select>
                         </td>
-                        <td>
-                            <select name="user" class="editable-field">
+                        <td class="finished-cell" onclick="showFinishedInput(this)">
+                            <span class="finished-display">
+                                {% if task.finished %}{{ task.finished|date:"d.m.Y" }}{% endif %}
+                            </span>
+                            <input type="date"
+                                   name="finished"
+                                   class="editable-field finished-input"
+                                   onchange="handleFinishedChange(this)"
+                                   onblur="hideFinishedInput(this)"
+                                   value="{{ task.finished|date:'Y-m-d' }}"
+                                   style="display: none;">
+                        </td>
+                        <td class="user-cell">
+                            <span class="user-display user-{{ task.user.id }}" onclick="showUserSelect(this)">
+                                {{ task.user.get_full_name|default:task.user.username }}
+                            </span>
+                            <select name="user" class="editable-field user-select" onchange="handleUserChange(this)" style="opacity: 0; position: absolute; left: 0; top: 0; width: 100%; height: 100%;">
                                 {% for user in users %}
-                                    <option value="{{ user.id }}" {% if task.user.id == user.id %}selected{% endif %}>{{ user.get_full_name|default:user.username }}</option>
+                                    <option value="{{ user.id }}" {% if task.user.id == user.id %}selected{% endif %}>
+                                        {{ user.get_full_name|default:user.username }}
+                                    </option>
                                 {% endfor %}
                             </select>
                         </td>
                         <td><input type="text" name="result" value="{{ task.result }}" class="editable-field"></td>
                         <td><textarea name="comment" class="editable-field">{{ task.comment }}</textarea></td>
                         <td>
-                            <div style="display: flex; gap: 5px; justify-content: center;">
-                                <button class="btn-save" title="Сохранить">
-                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
-                                    </svg>
-                                </button>
+                            <div class="actions-container">
                                 <button class="btn-delete" title="Удалить">
                                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                         <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
@@ -136,51 +162,268 @@
 </div>
 
 <style>
+/* Убираем все отступы у контейнеров и формы */
+.tasks-container,
+.add-task-section,
+.tasks-list,
+#addTaskForm,
+#addTaskTable {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.add-task-title {
+    padding-top: 25px;
+    padding-left: 25px;
+    padding-bottom: 25px;
+    color: #422253;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+    text-align: left;
+}
+
+.tasks-title {
+    padding-top: 25px;
+    padding-left: 25px;
+    padding-bottom: 25px;
+    color: #422253;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+    text-align: center;
+}
+
 .tasks-table {
     width: 100%;
     border-collapse: collapse;
-    margin: 20px 0;
+    margin: 0;
 }
 
 .tasks-table th, .tasks-table td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
-    font-size: 10px;
+    font-size: 14px;
 }
 
 .tasks-table th {
     background-color: #f2f2f2;
     position: relative;
+    overflow: visible;
+    white-space: normal;
 }
 
 .filter-input {
-    width: 100%;
+    width: calc(100% - 10px);
     margin-top: 5px;
     padding: 2px 5px;
     font-size: 12px;
+    box-sizing: border-box;
+    display: block;
 }
 
-/* Стили статусов */
-.status-on_hold { background-color: yellow; }
-.status-in_progress { background-color: orange; }
-.status-completed, .status-returned { background-color: lightgreen; }
-.status-cancelled, .status-recalled { background-color: lightgray; }
-.status-not_taken { background-color: white; }
+/* Обновленные стили для столбцов с учетом 11 столбцов */
+.tasks-table th:nth-child(11),
+.tasks-table td:nth-child(11),
+#addTaskTable th:nth-child(11),
+#addTaskTable td:nth-child(11) {
+    width: 60px;
+    min-width: 60px;
+    max-width: 60px;
+    text-align: center;
+}
 
-.priority-high { background-color: #ffcccc; }
+.tasks-table th:nth-child(2),
+.tasks-table td:nth-child(2),
+.tasks-table td:nth-child(8),
+.tasks-table td:nth-child(7),
+.tasks-table th:nth-child(6),
+.tasks-table td:nth-child(6),
+#addTaskTable th:nth-child(2),
+#addTaskTable td:nth-child(2),
+#addTaskTable td:nth-child(8),
+#addTaskTable td:nth-child(7),
+#addTaskTable th:nth-child(6),
+#addTaskTable td:nth-child(6) {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    text-align: center;
+}
 
-.status-select, .iteration-select {
+.tasks-table th:nth-child(4),
+.tasks-table th:nth-child(5),
+.tasks-table td:nth-child(4),
+.tasks-table td:nth-child(5),
+#addTaskTable th:nth-child(4),
+#addTaskTable th:nth-child(5),
+#addTaskTable td:nth-child(4),
+#addTaskTable td:nth-child(5) {
+    width: 30px;
+    min-width: 30px;
+    max-width: 30px;
+    text-align: center;
+}
+
+/* Общие стили для центрирования */
+.tasks-table td:nth-child(2) .editable-field,
+.tasks-table td:nth-child(4) .editable-field,
+.tasks-table td:nth-child(5) .editable-field,
+.tasks-table td:nth-child(6) .editable-field,
+.tasks-table td:nth-child(8) .editable-field,
+.tasks-table td:nth-child(7) .editable-field,
+.tasks-table td:nth-child(11) .editable-field,
+#addTaskTable td:nth-child(2) .form-control,
+#addTaskTable td:nth-child(4) .form-control,
+#addTaskTable td:nth-child(5) .form-control,
+#addTaskTable td:nth-child(6) .form-control,
+#addTaskTable td:nth-child(8) .form-control,
+#addTaskTable td:nth-child(7) .form-control,
+#addTaskTable td:nth-child(11) .form-control {
+    text-align: center;
+}
+
+.tasks-table td:nth-child(2) select,
+.tasks-table td:nth-child(4) select,
+.tasks-table td:nth-child(5) select,
+.tasks-table td:nth-child(6) select,
+.tasks-table td:nth-child(7) select,
+.tasks-table td:nth-child(8) select,
+#addTaskTable td:nth-child(2) select,
+#addTaskTable td:nth-child(4) select,
+#addTaskTable td:nth-child(5) select,
+#addTaskTable td:nth-child(6) select,
+#addTaskTable td:nth-child(7) select,
+#addTaskTable td:nth-child(8) select {
+    text-align: center;
+    text-align-last: center;
+}
+
+/* Общие стили для полей ввода */
+.tasks-table .editable-field,
+#addTaskTable .form-control {
     width: 100%;
+    height: 100%;
     border: none;
+    background: transparent;
+    padding: 8px;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.tasks-table .editable-field:focus,
+#addTaskTable .form-control:focus {
+    outline: none;
+    background: #f8f9fa;
+}
+
+/* Общие стили для textarea */
+.tasks-table textarea.editable-field,
+#addTaskTable textarea.form-control {
+    resize: none;
+    min-height: 30px;
+    height: 30px;
+}
+
+/* Общие стили для select */
+.tasks-table select.editable-field,
+#addTaskTable select.form-control {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
     background: transparent;
 }
 
-.form-control {
+/* Общие стили для ячеек */
+.tasks-table td,
+#addTaskTable td {
+    padding: 0 !important;
+    position: relative;
+}
+
+.tasks-table td:hover,
+#addTaskTable td:hover {
+    background: #f8f9fa;
+}
+
+/* Стили статусов */
+.status-on_hold { background-color: #FFF4D6; }
+.status-in_progress { background-color: #FFD8B8; }
+.status-completed, .status-returned { background-color: #D8EED5; }
+.status-cancelled, .status-recalled { background-color: #EDE8F0; }
+.status-not_taken { background-color: #FAF7FB; }
+
+.priority-high { background-color: #FFD1DC; }
+
+/* Стили пользователей - применяем к span */
+.user-1 { font-weight: bold; color: #2563EB; }
+.user-2 { font-weight: bold; color: #DC2626; }
+.user-3 { font-weight: bold; color: #059669; }
+.user-4 { font-weight: bold; color: #7C3AED; }
+.user-5 { font-weight: bold; color: #EA580C; }
+.user-6 { font-weight: bold; color: #DB2777; }
+.user-7 { font-weight: bold; color: #CA8A04; }
+.user-8 { font-weight: bold; color: #0891B2; }
+.user-9 { font-weight: bold; color: #65A30D; }
+.user-10 { font-weight: bold; color: #9333EA; }
+.user-11 { font-weight: bold; color: #E11D48; }
+
+.user-display {
+    padding: 8px;
+    display: block;
+}
+
+.user-cell {
+    position: relative;
+    min-height: 40px;
+    padding: 0 !important;
+}
+
+.user-display {
+    padding: 8px;
+    display: block;
     width: 100%;
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 3px;
+    height: 100%;
+    cursor: pointer;
+}
+
+.user-select {
+    z-index: 1;
+    cursor: pointer;
+}
+
+.finished-cell {
+    position: relative;
+    min-height: 40px;
+    padding: 0 !important;
+    cursor: pointer;
+}
+
+.finished-display {
+    padding-top: 2px;
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+.finished-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    cursor: pointer;
+}
+.actions-container {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
 }
 
 /* Стили кнопок */
@@ -192,35 +435,241 @@
     border-radius: 4px;
     transition: all 0.3s ease;
     font-size: 16px;
-    color: #6C3483; /* Оттенок основного цвета */
+    color: #6C3483;
 }
 
 .btn-save:hover {
-    background: #E8DAEF; /* Очень светлый оттенок основного цвета */
-    transform: scale(1.1);
+    background: #E8DAEF;
 }
 
 .btn-delete:hover {
-    background: #D2B4DE; /* Светлый оттенок основного цвета */
-    transform: scale(1.1);
+    background: #D2B4DE;
 }
 </style>
 
 <script>
+// Функция обновления стилей строки
+function updateRowStyles(row) {
+    const priorityCell = row.querySelector('.priority-cell');
+    const statusCell = row.querySelector('.status-cell');
+    const prioritySelect = row.querySelector('select[name="priority"]');
+    const statusSelect = row.querySelector('select[name="status"]');
+
+    if (prioritySelect && prioritySelect.value === 'true') {
+        priorityCell.classList.add('priority-high');
+    } else {
+        priorityCell.classList.remove('priority-high');
+    }
+
+    if (statusSelect && statusCell) {
+        statusCell.className = statusCell.className.replace(/\bstatus-\w+/g, '');
+        statusCell.classList.add('status-cell', `status-${statusSelect.value}`);
+    }
+}
+// Функции для работы с пользователями
+function showUserSelect(spanElement) {
+    const userCell = spanElement.closest('.user-cell');
+    const select = userCell.querySelector('.user-select');
+
+    spanElement.style.opacity = '0';
+    select.style.opacity = '1';
+    select.style.position = 'relative';
+    select.focus();
+}
+
+function handleUserChange(selectElement) {
+    const userCell = selectElement.closest('.user-cell');
+    const display = userCell.querySelector('.user-display');
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+
+    // Обновляем текст и цвет
+    display.textContent = selectedOption.text;
+    display.className = `user-display user-${selectElement.value}`;
+
+    // Возвращаем отображение
+    display.style.opacity = '1';
+    selectElement.style.opacity = '0';
+    selectElement.style.position = 'absolute';
+
+    // Сохраняем изменения
+    const row = userCell.closest('tr');
+    saveTaskChanges(row);
+}
+
+// Закрываем селект при клике вне ячейки
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.user-cell')) {
+        document.querySelectorAll('.user-cell').forEach(userCell => {
+            const display = userCell.querySelector('.user-display');
+            const select = userCell.querySelector('.user-select');
+
+            display.style.opacity = '1';
+            select.style.opacity = '0';
+            select.style.position = 'absolute';
+        });
+    }
+});
+
+// Функции для работы с датой завершения
+function showFinishedInput(element) {
+    const finishedCell = element.closest ? element.closest('.finished-cell') : element;
+    const display = finishedCell.querySelector('.finished-display');
+    const input = finishedCell.querySelector('.finished-input');
+
+    display.style.display = 'none';
+    input.style.display = 'block';
+    input.style.position = 'relative';
+    input.style.opacity = '1';
+    input.focus();
+
+    // Показываем календарь (работает в некоторых браузерах)
+    input.showPicker ? input.showPicker() : input.click();
+}
+
+function handleFinishedChange(inputElement) {
+    const finishedCell = inputElement.closest('.finished-cell');
+    const display = finishedCell.querySelector('.finished-display');
+
+    // Форматируем дату для отображения
+    if (inputElement.value) {
+        const date = new Date(inputElement.value);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        display.textContent = `${day}.${month}.${year}`;
+    } else {
+        display.textContent = '';
+    }
+
+    hideFinishedInput(inputElement);
+
+    // Сохраняем изменения
+    const row = finishedCell.closest('tr');
+    saveTaskChanges(row);
+}
+
+function hideFinishedInput(inputElement) {
+    const finishedCell = inputElement.closest('.finished-cell');
+    const display = finishedCell.querySelector('.finished-display');
+    const input = finishedCell.querySelector('.finished-input');
+
+    display.style.display = 'block';
+    input.style.display = 'none';
+}
+
+// Закрываем input при клике вне ячейки
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.finished-cell')) {
+        document.querySelectorAll('.finished-cell').forEach(finishedCell => {
+            const display = finishedCell.querySelector('.finished-display');
+            const input = finishedCell.querySelector('.finished-input');
+
+            display.style.display = 'block';
+            input.style.display = 'none';
+        });
+    }
+});
+
+// Функция сохранения изменений задачи
+function saveTaskChanges(row) {
+    const taskId = row.dataset.taskId;
+    const formData = new FormData();
+
+    // Собираем данные из всех полей ввода
+    row.querySelectorAll('.editable-field').forEach(field => {
+        formData.append(field.name, field.value);
+    });
+
+    // Также собираем данные из display полей (если нужно)
+    const userDisplay = row.querySelector('.user-display');
+    const userSelect = row.querySelector('.user-select');
+    if (userDisplay && userSelect) {
+        formData.append('user', userSelect.value);
+    }
+
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+    fetch(`/tasks/${taskId}/update/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Ошибка сохранения: ' + (data.error || 'Неизвестная ошибка'));
+        }
+    })
+    .catch(error => {
+        alert('Ошибка сохранения: ' + error.message);
+    });
+}
+
+// Автосохранение при изменении полей (кроме пользователя)
+document.getElementById('tasksTable').addEventListener('change', function(e) {
+    if (e.target.matches('.editable-field') && !e.target.classList.contains('user-select')) {
+        const row = e.target.closest('tr');
+        updateRowStyles(row);
+        saveTaskChanges(row);
+    }
+});
+
+// Автосохранение при потере фокуса для текстовых полей
+document.getElementById('tasksTable').addEventListener('blur', function(e) {
+    if (e.target.matches('input.editable-field, textarea.editable-field')) {
+        const row = e.target.closest('tr');
+        setTimeout(() => {
+            saveTaskChanges(row);
+        }, 100);
+    }
+}, true);
+
+// Удаление задачи
+document.getElementById('tasksTable').addEventListener('click', function(e) {
+    const target = e.target;
+    if (target.closest('.btn-delete')) {
+        const btn = target.closest('.btn-delete');
+        const row = btn.closest('tr');
+        const taskId = row.dataset.taskId;
+
+        if (confirm('Удалить эту задачу?')) {
+            fetch(`/tasks/${taskId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: new URLSearchParams({
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Ошибка удаления: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            })
+            .catch(error => {
+                alert('Ошибка удаления: ' + error.message);
+            });
+        }
+    }
+});
+
 // Добавление задачи
 document.getElementById('addTaskForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const formData = new FormData(this);
 
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    if (csrfToken) {
-        formData.append('csrfmiddlewaretoken', csrfToken);
-    }
-
     fetch(this.action, {
         method: 'POST',
         body: formData,
-
     })
     .then(response => response.json())
     .then(data => {
@@ -241,78 +690,34 @@ document.querySelectorAll('.filter-input').forEach(input => {
         document.querySelectorAll('#tasksTable tbody tr').forEach(row => {
             const cell = row.cells[column];
             if (cell) {
-                const text = cell.textContent.toLowerCase();
-                row.style.display = text.includes(filterValue) ? '' : 'none';
-            }
-        });
-    });
-});
+                let cellValue = '';
+                const input = cell.querySelector('input');
+                const select = cell.querySelector('select');
+                const textarea = cell.querySelector('textarea');
+                const display = cell.querySelector('.user-display');
 
-// Сохранение изменений
-document.querySelectorAll('.btn-save').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const row = this.closest('tr');
-        const taskId = row.dataset.taskId;
-        const formData = new FormData();
-
-        // Собираем все данные из редактируемых полей
-        row.querySelectorAll('.editable-field').forEach(field => {
-            formData.append(field.name, field.value);
-        });
-
-        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-        fetch(`/tasks/${taskId}/update/`, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Обновляем стили
-                const priorityCell = row.querySelector('.priority-cell');
-                const statusCell = row.querySelector('.status-cell');
-                const prioritySelect = row.querySelector('select[name="priority"]');
-
-                // Обновляем подсветку приоритета
-                if (prioritySelect.value === 'true') {
-                    priorityCell.classList.add('priority-high');
+                if (input) {
+                    cellValue = input.value.toLowerCase();
+                } else if (select) {
+                    const selectedOption = select.options[select.selectedIndex];
+                    cellValue = selectedOption.text.toLowerCase();
+                } else if (textarea) {
+                    cellValue = textarea.value.toLowerCase();
+                } else if (display) {
+                    cellValue = display.textContent.toLowerCase();
                 } else {
-                    priorityCell.classList.remove('priority-high');
+                    cellValue = cell.textContent.toLowerCase();
                 }
 
-                // Обновляем подсветку статуса
-                const statusSelect = row.querySelector('select[name="status"]');
-                statusCell.className = `status-cell status-${statusSelect.value}`;
-
-            } else {
-                alert('Ошибка сохранения');
+                row.style.display = cellValue.includes(filterValue) ? '' : 'none';
             }
         });
     });
 });
-// Обработчик для удаления
-document.querySelectorAll('.btn-delete').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const row = this.closest('tr');
-        const taskId = row.dataset.taskId;
 
-        if (confirm('Удалить эту задачу?')) {
-            fetch(`/tasks/${taskId}/delete/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    row.remove();
-                }
-            });
-        }
-    });
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    initUserEditing();
 });
 </script>
 {% endblock %}

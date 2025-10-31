@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 
 class Task(models.Model):
@@ -28,7 +29,11 @@ class Task(models.Model):
     name = models.CharField(max_length=100, verbose_name='Наименование комплекта')
     priority = models.BooleanField(default=False, verbose_name='Приоритет')
     iteration = models.IntegerField(choices=ITERATIONS, default=ITERATIONS[0][1], verbose_name='Итерация')
-    status = models.CharField(max_length=50, choices=STATUSES, default=STATUSES[0][1])
+    status = models.CharField(max_length=50, choices=STATUSES, default=STATUSES[0][1], verbose_name='Статус')
     user = models.ForeignKey(get_user_model(), verbose_name='Сотрудник ТДО', on_delete=models.DO_NOTHING)
+    finished = models.DateField(null=True, blank=True, verbose_name='Завершено')
     result = models.CharField(max_length=100, verbose_name='Созданный процесс, TRM', blank=True)
     comment = models.TextField(verbose_name='Комментарий', blank=True)
+
+    class Meta:
+        ordering = ('-created', )

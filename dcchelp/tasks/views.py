@@ -1,7 +1,9 @@
-from datetime import timedelta
+
+from datetime import timedelta, datetime
 import json
 
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from dccpdh2.utils import DataMixin
@@ -21,59 +23,76 @@ class TasksView(DataMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        time_threshold = timezone.now() - timedelta(hours=72)
-        tasks = Task.objects.filter(created__gte=time_threshold)
-
-        context['tasks'] = tasks
         context['form'] = TaskFrom()
         context['status_choices'] = Task.STATUSES
         context['iteration_choices'] = Task.ITERATIONS
-        context['users'] = get_user_model().objects.all()  # ← добавить
+        context['users'] = get_user_model().objects.all()
         return self.get_mixin_context(context)
 
     def get_queryset(self):
         time_threshold = timezone.now() - timedelta(hours=72)
-        tasks = Task.objects.filter(created__gte=time_threshold)
+        tasks = Task.objects.filter(
+            Q(created__gte=time_threshold) |
+            Q(status__in=['not_taken', 'in_progress', 'on_hold'])
+        )
         return tasks
 
 
 @csrf_exempt
 def add_task(request):
     if request.method == 'POST':
-        print("POST data:", request.POST)  # для отладки
         form = TaskFrom(request.POST)
         if form.is_valid():
-            task = form.save()
-            print("Task saved:", task.id)  # для отладки
+            form.save()
             return JsonResponse({'success': True})
         else:
-            print("Form errors:", form.errors)  # для отладки
             return JsonResponse({'success': False, 'errors': form.errors})
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
+@csrf_exempt
 def update_task(request, task_id):
     if request.method == 'POST':
         try:
             task = Task.objects.get(id=task_id)
-            print("POST data:", dict(request.POST))  # ← что приходит
-
-            # Обновляем все поля
             task.number = request.POST.get('number')
-            task.created = request.POST.get('created')
+            created_str = request.POST.get('created')
+
+            try:
+                created_dt = datetime.strptime(created_str, '%d.%m.%Y %H:%M')
+                task.created = created_dt
+            except ValueError:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Неверный формат даты: {created_str}. Используйте ДД.ММ.ГГГГ ЧЧ:ММ'
+                })
+
             task.name = request.POST.get('name')
             task.priority = request.POST.get('priority') == 'true'
             task.iteration = int(request.POST.get('iteration'))
             task.status = request.POST.get('status')
+
+            # Правильная обработка поля finished
+            finished_str = request.POST.get('finished')
+            if finished_str:
+                try:
+                    task.finished = finished_str  # 'YYYY-MM-DD' формат уже правильный
+                except ValueError:
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'Неверный формат даты завершения: {finished_str}'
+                    })
+            else:
+                task.finished = None  # Устанавливаем None если поле пустое
+
             task.user_id = request.POST.get('user')
             task.result = request.POST.get('result')
             task.comment = request.POST.get('comment')
 
+            print("Received data:", dict(request.POST))
             task.save()
-            print("Task saved:", task.id, task.number)  # ← подтверждение
             return JsonResponse({'success': True})
         except Exception as e:
-            print("Error:", str(e))  # ← ошибки
             return JsonResponse({'success': False, 'error': str(e)})
 
 
