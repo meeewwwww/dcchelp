@@ -54,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
 ROOT_URLCONF = 'dcchelp.urls'
@@ -113,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -180,7 +181,8 @@ CKEDITOR_5_CONFIGS = {
         },
         'simpleUpload': {
             'uploadUrl': None,  # отключаем загрузку на сервер
-        }
+        },
+        'language': 'ru',
 
     },
     'extends': {
@@ -238,7 +240,8 @@ CKEDITOR_5_CONFIGS = {
             'styles': 'true',
             'startIndex': 'true',
             'reversed': 'true',
-        }
+        },
+        'language': 'ru',
     }
 }
 

@@ -1,7 +1,11 @@
+from datetime import date
+
 from django.contrib.auth import get_user_model
+from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
+from django.utils.html import format_html
 
 
 class Task(models.Model):
@@ -30,10 +34,14 @@ class Task(models.Model):
     priority = models.BooleanField(default=False, verbose_name='Приоритет')
     iteration = models.IntegerField(choices=ITERATIONS, default=ITERATIONS[0][1], verbose_name='Итерация')
     status = models.CharField(max_length=50, choices=STATUSES, default=STATUSES[0][1], verbose_name='Статус')
-    user = models.ForeignKey(get_user_model(), verbose_name='Сотрудник ТДО', on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(get_user_model(), verbose_name='Сотрудник ТДО', on_delete=models.DO_NOTHING, null=True)
     finished = models.DateField(null=True, blank=True, verbose_name='Завершено')
     result = models.CharField(max_length=100, verbose_name='Созданный процесс, TRM', blank=True)
     comment = models.TextField(verbose_name='Комментарий', blank=True)
 
     class Meta:
         ordering = ('-created', )
+
+    @admin.display
+    def created_date(self):
+        return self.created.date

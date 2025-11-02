@@ -3,6 +3,8 @@
 {% autoescape off %}
 {% load static %}
 
+{% include 'to_include/add_change.html' %}
+
 <script src="{% static 'js/list_of_changes.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/list_of_changes.css' %}?v=1.1">
 
@@ -48,7 +50,7 @@
             <p class="change-text">{{ change.text }}</p>
             <p class="change-text"><b>Создано:</b> {{ change.created|date:"d.m.Y" }} {{ change.created|time:"H:i" }}</p>
             <p class="change-text"><b>Обновлено:</b> {{ change.updated|date:"d.m.Y" }} {{ change.updated|time:"H:i" }}</p>
-            <p class="change-text"><b>Согласование:</b> <a href="{{ change.link_approvement }}" target="_blank">{{ change.link_approvement }}</a></p>
+            <p class="change-text"><b>Согласование:</b> <a href="{% if '://' in change.link_approvement %}{{ change.link_approvement }}{% else %}http://{{ change.link_approvement }}{% endif %}" target="_blank">{{ change.link_approvement }}</a></p>
         </div>
     </div>
     {% endfor %}
@@ -72,7 +74,4 @@
 }
 </style>
 
-{% endblock %}
-{% block modal %}
-{% include 'to_include/add_change.html' %}
 {% endblock %}

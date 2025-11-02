@@ -26,7 +26,7 @@ class TasksView(DataMixin, ListView):
         context['form'] = TaskFrom()
         context['status_choices'] = Task.STATUSES
         context['iteration_choices'] = Task.ITERATIONS
-        context['users'] = get_user_model().objects.all()
+        context['users'] = get_user_model().objects.filter(is_superuser=0).order_by('first_name')
         return self.get_mixin_context(context)
 
     def get_queryset(self):

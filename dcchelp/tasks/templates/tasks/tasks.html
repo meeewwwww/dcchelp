@@ -51,7 +51,8 @@
                         </td>
                         <td><input type="date" name="finished" class="form-control"></td>
                         <td>
-                            <select name="user" class="form-control" required>
+                            <select name="user" class="form-control">
+                                <option value="">Не выбрано</option>
                                 {% for user in users %}
                                     <option value="{{ user.id }}">{{ user.get_full_name|default:user.username }}</option>
                                 {% endfor %}
@@ -132,10 +133,15 @@
                                    style="display: none;">
                         </td>
                         <td class="user-cell">
-                            <span class="user-display user-{{ task.user.id }}" onclick="showUserSelect(this)">
-                                {{ task.user.get_full_name|default:task.user.username }}
+                            <span class="user-display user-{% if task.user %}{{ task.user.id }}{% else %}none{% endif %}" onclick="showUserSelect(this)">
+                                {% if task.user %}
+                                    {{ task.user.get_full_name|default:task.user.username }}
+                                {% else %}
+                                    Не выбрано
+                                {% endif %}
                             </span>
                             <select name="user" class="editable-field user-select" onchange="handleUserChange(this)" style="opacity: 0; position: absolute; left: 0; top: 0; width: 100%; height: 100%;">
+                                <option value="">Не выбрано</option>
                                 {% for user in users %}
                                     <option value="{{ user.id }}" {% if task.user.id == user.id %}selected{% endif %}>
                                         {{ user.get_full_name|default:user.username }}
@@ -215,6 +221,7 @@
     position: relative;
     overflow: visible;
     white-space: normal;
+    text-align: center;
 }
 
 .filter-input {
@@ -239,7 +246,6 @@
 
 .tasks-table th:nth-child(2),
 .tasks-table td:nth-child(2),
-.tasks-table td:nth-child(8),
 .tasks-table td:nth-child(7),
 .tasks-table th:nth-child(6),
 .tasks-table td:nth-child(6),
@@ -274,7 +280,6 @@
 .tasks-table td:nth-child(4) .editable-field,
 .tasks-table td:nth-child(5) .editable-field,
 .tasks-table td:nth-child(6) .editable-field,
-.tasks-table td:nth-child(8) .editable-field,
 .tasks-table td:nth-child(7) .editable-field,
 .tasks-table td:nth-child(11) .editable-field,
 #addTaskTable td:nth-child(2) .form-control,
@@ -292,7 +297,6 @@
 .tasks-table td:nth-child(5) select,
 .tasks-table td:nth-child(6) select,
 .tasks-table td:nth-child(7) select,
-.tasks-table td:nth-child(8) select,
 #addTaskTable td:nth-child(2) select,
 #addTaskTable td:nth-child(4) select,
 #addTaskTable td:nth-child(5) select,
@@ -301,6 +305,23 @@
 #addTaskTable td:nth-child(8) select {
     text-align: center;
     text-align-last: center;
+}
+
+.tasks-table td:nth-child(8) {
+    width: 130px;
+    text-align: center;
+    padding: 0 !important;
+}
+
+.tasks-table td:nth-child(8) .editable-field,
+.tasks-table td:nth-child(8) .user-display {
+    padding: 8px 0 !important; /* убираем боковые паддинги */
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    box-sizing: border-box;
+    text-align: center;
 }
 
 /* Общие стили для полей ввода */
@@ -431,7 +452,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    padding: 8px;
+    padding: 3px;
     border-radius: 4px;
     transition: all 0.3s ease;
     font-size: 16px;
@@ -593,15 +614,23 @@ function saveTaskChanges(row) {
         method: 'POST',
         body: formData,
         headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}'  // ← вместо formData.append
+        },
+        credentials: 'same-origin'  // ← важно для Edge
     })
     .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Ошибка сохранения: ' + (data.error || 'Неизвестная ошибка'));
+    .then(text => {
+        console.log('Raw response:', text);
+        try {
+            const data = JSON.parse(text);
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Ошибка сохранения: ' + (data.error || 'Неизвестная ошибка'));
+            }
+        } catch(e) {
+            console.error('JSON parse error:', e);
         }
     })
     .catch(error => {
@@ -715,9 +744,19 @@ document.querySelectorAll('.filter-input').forEach(input => {
     });
 });
 
+function initUserEditing() {
+    // Инициализация редактирования пользователей
+    document.querySelectorAll('.user-display').forEach(display => {
+        display.addEventListener('click', function() {
+            showUserSelect(this);
+        });
+    });
+}
+
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     initUserEditing();
 });
+
 </script>
 {% endblock %}

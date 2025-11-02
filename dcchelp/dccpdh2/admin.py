@@ -1,3 +1,12 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import FAQ
+
+
+@admin.register(FAQ)
+class FAQAdmin(admin.ModelAdmin):
+    list_display = ('question', 'answer', 'answered')
+    list_display_links = ('question', )
+    list_editable = ('answer', 'answered')
+    list_per_page = 10
+
