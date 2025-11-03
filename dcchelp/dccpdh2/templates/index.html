@@ -2,6 +2,31 @@
 
 {% block content %}
 <div class="dashboard-grid-index">
+    <!-- Статистика задач -->
+    <div class="dashboard-card-index">
+        <div class="card-header-index">
+            <h2 class="card-title-index">Активных задач: {{ active_tasks }}</h2>
+        </div>
+        <div class="stats-grid-index">
+            <div class="stat-item-index">
+                <div class="stat-number-index">{{ in_progress }}</div>
+                <div class="stat-label-index">В работе</div>
+            </div>
+            <div class="stat-item-index">
+                <div class="stat-number-index">{{ not_taken }}</div>
+                <div class="stat-label-index">Не взято в работу</div>
+            </div>
+            <div class="stat-item-index">
+                <div class="stat-number-index">{{ high_priority }}</div>
+                <div class="stat-label-index">Приоритетных</div>
+            </div>
+            <div class="stat-item-index">
+                <div class="stat-number-index">{{ on_hold }}</div>
+                <div class="stat-label-index">HOLD</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Блок изменений -->
     <div class="dashboard-card-index">
         <div class="card-header-index">
@@ -25,6 +50,16 @@
                 <span>Нет изменений для отображения</span>
             </div>
             {% endfor %}
+        </div>
+    </div>
+
+    <!-- График задач -->
+    <div class="dashboard-card-index">
+        <div class="card-header-index">
+            <h2 class="card-title-index">Динамика получения задач (30 дней)</h2>
+        </div>
+        <div class="chart-container-index">
+            <canvas id="tasksChart"></canvas>
         </div>
     </div>
 
@@ -54,25 +89,140 @@
             {% endfor %}
         </div>
     </div>
-    <!-- Пустой -->
-    <div class="dashboard-card-index empty-card-index">
-        <div class="card-header-index">
-            <h2 class="card-title-index">Ваш раздел</h2>
-        </div>
-        <div class="card-content-index">
-            <p>Здесь будет ваш контент</p>
-        </div>
-    </div>
-    <!-- Пустой -->
-    <div class="dashboard-card-index empty-card-index">
-        <div class="card-header-index">
-            <h2 class="card-title-index">Ваш раздел</h2>
-        </div>
-        <div class="card-content-index">
-            <p>Здесь будет ваш контент</p>
-        </div>
-    </div>
+
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Получаем данные из Django template
+    const chartData = {{ chart_data|safe }};
+
+    // Извлекаем даты и количества
+    const dates = chartData.map(item => item.date);
+    const counts = chartData.map(item => item.count);
+
+    console.log('Chart data loaded:', { dates, counts }); // Для отладки
+
+    // Создаем график
+    const ctx = document.getElementById('tasksChart').getContext('2d');
+    const tasksChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Задач создано',
+                data: counts,
+                borderColor: '#422253',
+                backgroundColor: 'rgba(66, 34, 83, 0.7)',
+                borderWidth: 2,
+                borderRadius: 4,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false,
+
+                    labels: {
+                        font: {
+                            size: 14,
+                            family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                        },
+                        color: '#422253'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(66, 34, 83, 0.9)',
+                    titleFont: {
+                        size: 13
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    padding: 10,
+                    cornerRadius: 8,
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            // Получаем полную дату из данных
+                            const dataIndex = tooltipItems[0].dataIndex;
+                            const fullDate = chartData[dataIndex].full_date;
+                            if (fullDate) {
+                                return fullDate;
+                            }
+                            // Если full_date нет, формируем из текущей даты
+                            const today = new Date();
+                            const targetDate = new Date();
+                            targetDate.setDate(today.getDate() - (29 - dataIndex));
+                            return targetDate.toLocaleDateString('ru-RU', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                            });
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#6c757d',
+                        precision: 0
+                    },
+                    title: {
+                        display: true,
+                        text: 'Количество задач',
+                        font: {
+                            size: 13,
+                            weight: 'bold'
+                        },
+                        color: '#422253'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 11
+                        },
+                        color: '#6c757d',
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    title: {
+                        display: true,
+                        text: 'Даты',
+                        font: {
+                            size: 13,
+                            weight: 'bold'
+                        },
+                        color: '#422253'
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            animations: {
+                duration: 1000,
+                easing: 'easeOutQuart'
+            }
+        }
+    });
+});
+</script>
 {% endblock %}
 

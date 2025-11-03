@@ -34,7 +34,7 @@ class TasksView(DataMixin, ListView):
         tasks = Task.objects.filter(
             Q(created__gte=time_threshold) |
             Q(status__in=['not_taken', 'in_progress', 'on_hold'])
-        )
+        ).order_by('-created')
         return tasks
 
 

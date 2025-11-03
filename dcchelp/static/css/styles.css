@@ -273,6 +273,63 @@ body {
     padding: 20px;
 }
 
+/* Дополнительные стили для статистики */
+.stats-grid-index {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0;
+    flex: 1;
+}
+
+.stat-item-index {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+    border-right: 1px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.2s ease;
+}
+
+.stat-item-index:hover {
+    background-color: #f8f9fa;
+}
+
+.stat-item-index:nth-child(2n) {
+    border-right: none;
+}
+
+.stat-item-index:nth-child(3),
+.stat-item-index:nth-child(4) {
+    border-bottom: none;
+}
+
+.stat-number-index {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #422253;
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+.stat-label-index {
+    font-size: 0.9rem;
+    color: #6c757d;
+    text-align: center;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+/* Стили для графика */
+.chart-container-index {
+    flex: 1;
+    padding: 20px;
+    position: relative;
+    height: 300px;
+}
+
 /* Стили FAQ */
 .faq-content {
     max-width: 800px;
@@ -323,6 +380,8 @@ body {
     width: 90%;
     max-width: 600px;
     border-radius: 8px;
+    max-height: 90vh; /* ограничиваем высоту */
+    overflow-y: auto; /* добавляем прокрутку */
 }
 
 @keyframes modalSlideIn {
@@ -351,6 +410,7 @@ body {
     padding: 0;
     overflow-y: auto;
     flex-grow: 1;
+    max-height: 60vh;
 }
 
 form {

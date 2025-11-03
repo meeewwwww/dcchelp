@@ -61,7 +61,7 @@
                         <td><input type="text" name="result" class="form-control"></td>
                         <td><textarea name="comment" class="form-control"></textarea></td>
                         <td>
-                            <button class="btn-save" title="Сохранить">
+                            <button class="btn-save" title="Сохранить" type="submit">
                                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                     <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
                                 </svg>
@@ -77,6 +77,12 @@
     <div class="tasks-list">
         <table class="tasks-table" id="tasksTable">
             <p class="tasks-title">Задачи (поступившие за последние 72 часа)</p>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="showMyTasks">
+                <label class="form-check-label" for="showMyTasks">
+                    Показывать только мои задачи
+                </label>
+            </div>
             <thead>
                 <tr>
                     {% for field in form %}
@@ -90,7 +96,7 @@
             </thead>
             <tbody>
                 {% for task in tasks %}
-                    <tr data-task-id="{{ task.id }}">
+                    <tr data-task-id="{{ task.id }}" data-created="{{ task.created|date:'c' }}">
                         <td><input type="text" name="number" value="{{ task.number }}" class="editable-field"></td>
                         <td>
                             <input type="text"
@@ -98,6 +104,10 @@
                                    value="{{ task.created|date:'d.m.Y H:i' }}"
                                    class="editable-field"
                                    placeholder="30.10.2025 14:56">
+                            <!-- Скрытое поле с ISO-датой для корректной сортировки -->
+                            <input type="hidden"
+                                   class="created-iso"
+                                   value="{{ task.created|date:'c' }}">
                         </td>
                         <td><input type="text" name="name" value="{{ task.name }}" class="editable-field"></td>
                         <td class="priority-cell {% if task.priority %}priority-high{% endif %}">
@@ -194,7 +204,6 @@
 .tasks-title {
     padding-top: 25px;
     padding-left: 25px;
-    padding-bottom: 25px;
     color: #422253;
     font-size: 1.25rem;
     font-weight: 600;
@@ -373,7 +382,7 @@
 }
 
 /* Стили статусов */
-.status-on_hold { background-color: #FFF4D6; }
+.status-on_hold { background-color: #fcf003; }
 .status-in_progress { background-color: #FFD8B8; }
 .status-completed, .status-returned { background-color: #D8EED5; }
 .status-cancelled, .status-recalled { background-color: #EDE8F0; }
@@ -465,6 +474,24 @@
 
 .btn-delete:hover {
     background: #D2B4DE;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.form-check-input {
+    margin-right: 8px;
+
+}
+
+.form-check-label {
+    font-weight: normal;
+    cursor: pointer;
+    user-select: none;
 }
 </style>
 
@@ -715,32 +742,65 @@ document.querySelectorAll('.filter-input').forEach(input => {
     input.addEventListener('input', function() {
         const column = this.dataset.column;
         const filterValue = this.value.toLowerCase();
+        let hasVisibleRows = false;
 
         document.querySelectorAll('#tasksTable tbody tr').forEach(row => {
             const cell = row.cells[column];
             if (cell) {
                 let cellValue = '';
-                const input = cell.querySelector('input');
-                const select = cell.querySelector('select');
-                const textarea = cell.querySelector('textarea');
-                const display = cell.querySelector('.user-display');
 
-                if (input) {
-                    cellValue = input.value.toLowerCase();
-                } else if (select) {
-                    const selectedOption = select.options[select.selectedIndex];
-                    cellValue = selectedOption.text.toLowerCase();
-                } else if (textarea) {
-                    cellValue = textarea.value.toLowerCase();
-                } else if (display) {
-                    cellValue = display.textContent.toLowerCase();
+                // ОСОБАЯ ОБРАБОТКА ДЛЯ КОЛОНКИ С ДАТОЙ (индекс 1)
+                if (column === '1') {
+                    const isoInput = cell.querySelector('.created-iso');
+                    if (isoInput) {
+                        const isoDate = new Date(isoInput.value);
+                        // Форматируем как в интерфейсе
+                        const day = String(isoDate.getDate()).padStart(2, '0');
+                        const month = String(isoDate.getMonth() + 1).padStart(2, '0');
+                        const year = isoDate.getFullYear();
+                        const hours = String(isoDate.getHours()).padStart(2, '0');
+                        const minutes = String(isoDate.getMinutes()).padStart(2, '0');
+                        cellValue = `${day}.${month}.${year} ${hours}:${minutes}`.toLowerCase();
+                    }
                 } else {
-                    cellValue = cell.textContent.toLowerCase();
+                    // Обычная обработка для других колонок
+                    const input = cell.querySelector('input');
+                    const select = cell.querySelector('select');
+                    const textarea = cell.querySelector('textarea');
+                    const display = cell.querySelector('.user-display');
+
+                    if (input) {
+                        cellValue = input.value.toLowerCase();
+                    } else if (select) {
+                        const selectedOption = select.options[select.selectedIndex];
+                        cellValue = selectedOption.text.toLowerCase();
+                    } else if (textarea) {
+                        cellValue = textarea.value.toLowerCase();
+                    } else if (display) {
+                        cellValue = display.textContent.toLowerCase();
+                    } else {
+                        cellValue = cell.textContent.toLowerCase();
+                    }
                 }
 
-                row.style.display = cellValue.includes(filterValue) ? '' : 'none';
+                const isVisible = cellValue.includes(filterValue);
+                row.style.display = isVisible ? '' : 'none';
+                if (isVisible) hasVisibleRows = true;
             }
         });
+
+        // Если нет видимых строк, показываем сообщение
+        const noResultsRow = document.getElementById('no-results-row');
+        if (!hasVisibleRows) {
+            if (!noResultsRow) {
+                const newRow = document.createElement('tr');
+                newRow.id = 'no-results-row';
+                newRow.innerHTML = `<td colspan="20" style="text-align: center; padding: 20px; color: #666;">Нет задач, соответствующих фильтру</td>`;
+                document.querySelector('#tasksTable tbody').appendChild(newRow);
+            }
+        } else if (noResultsRow) {
+            noResultsRow.remove();
+        }
     });
 });
 
@@ -753,8 +813,64 @@ function initUserEditing() {
     });
 }
 
+// Функция для сохранения настройки фильтра
+function saveFilterPreference(value) {
+    localStorage.setItem('showMyTasks', value.toString());
+}
+
+// Функция для загрузки настройки фильтра
+function loadFilterPreference() {
+    return localStorage.getItem('showMyTasks') === 'true';
+}
+
+// Функция применения фильтра
+function applyMyTasksFilter() {
+    const showMyTasks = loadFilterPreference();
+    const currentUserId = {{ request.user.id }}; // ID текущего пользователя
+
+    document.querySelectorAll('#tasksTable tbody tr').forEach(row => {
+        if (showMyTasks) {
+            // Находим ячейку с пользователем и проверяем ID
+            const userSelect = row.querySelector('.user-select');
+            const userDisplay = row.querySelector('.user-display');
+            let userId = null;
+
+            if (userSelect) {
+                userId = userSelect.value;
+            } else if (userDisplay) {
+                // Извлекаем ID из класса user-display user-123
+                const userClass = Array.from(userDisplay.classList).find(cls => cls.startsWith('user-'));
+                if (userClass) {
+                    userId = userClass.replace('user-', '');
+                }
+            }
+
+            // Показываем только задачи текущего пользователя
+            row.style.display = (userId === currentUserId.toString()) ? '' : 'none';
+        } else {
+            // Показываем все задачи
+            row.style.display = '';
+        }
+    });
+}
+
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('showMyTasks');
+
+    // Загружаем сохраненное значение
+    const savedValue = loadFilterPreference();
+    checkbox.checked = savedValue;
+
+    // Применяем фильтр при загрузке
+    applyMyTasksFilter();
+
+    // Обработчик изменения checkbox
+    checkbox.addEventListener('change', function() {
+        saveFilterPreference(this.checked);
+        applyMyTasksFilter();
+    });
+
     initUserEditing();
 });
 

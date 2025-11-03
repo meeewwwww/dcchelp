@@ -39,9 +39,6 @@ class Task(models.Model):
     result = models.CharField(max_length=100, verbose_name='Созданный процесс, TRM', blank=True)
     comment = models.TextField(verbose_name='Комментарий', blank=True)
 
-    class Meta:
-        ordering = ('-created', )
-
     @admin.display
     def created_date(self):
         return self.created.date
