@@ -190,15 +190,14 @@ CKEDITOR_5_CONFIGS = {
             'paragraph', 'heading1', 'heading2', 'heading3',
             '|',
             'bulletedList', 'numberedList',
-            '|',
-            'blockQuote',
+
         ],
         'toolbar': {
             'items': ['heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'link', 'underline', 'strikethrough',
                       'code','subscript', 'superscript', 'highlight', '|', 'codeBlock', 'sourceEditing', 'insertImage',
-                    'bulletedList', 'numberedList', 'todoList', '|',  'blockQuote', 'imageUpload', '|',
-                    'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'mediaEmbed', 'removeFormat',
-                    'insertTable',
+                      'bulletedList', 'numberedList', 'todoList', '|',  'imageUpload', '|',
+                      'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'mediaEmbed', 'removeFormat',
+                      'insertTable',
                     ],
             'shouldNotGroupWhenFull': 'true'
         },

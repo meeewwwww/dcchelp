@@ -9,7 +9,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import ListView, TemplateView, CreateView, DeleteView
 
-from .forms import DocumentArticleForm
+from .forms import DocumentArticleForm, DocumentArticleEditForm
 from .models import DocumentTypes, DocumentArticle, DocumentSubType, FAQ
 from .utils import DataMixin
 from list_of_changes.models import Change
@@ -140,6 +140,28 @@ def get_subtypes(request, doc_type_id):
         return JsonResponse({'subtypes': list(subtypes)})
     except DocumentTypes.DoesNotExist:
         return JsonResponse({'subtypes': []})
+
+
+def edit_article(request, article_id):
+    article = get_object_or_404(DocumentArticle, id=article_id)
+    if request.method == 'POST':
+        form = DocumentArticleEditForm(request.POST, instance=article)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False, 'errors': form.errors})
+
+    return JsonResponse({
+        'title': article.title,
+        'text': article.text,
+    })
+
+
+def delete_article(request, article_id):
+    if request.method == 'POST':
+        article = get_object_or_404(DocumentArticle, id=article_id)
+        article.delete()
+        return JsonResponse({'success': True})
 
 
 class FAQView(DataMixin, ListView):

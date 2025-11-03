@@ -28,3 +28,9 @@ class DocumentArticleForm(forms.ModelForm):
     def clean_doc_sub_type(self):
         # Пропускаем валидацию, так как подтипы загружаются через AJAX
         return self.cleaned_data['doc_sub_type']
+
+
+class DocumentArticleEditForm(forms.ModelForm):
+    class Meta:
+        model = DocumentArticle
+        fields = ['title', 'text']

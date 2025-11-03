@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="page-container">
@@ -295,6 +296,192 @@
 .ck.ck-icon {
     color: white !important;
 }
+
+.article-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.article-actions {
+    display: flex;
+    gap: 5px;
+    margin-left: 10px;
+}
+
+.edit-btn, .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background-color 0.3s;
+    color: #6C3483; /* Оттенок основного цвета */
+}
+
+.edit-btn:hover {
+    background: #E8DAEF; /* Очень светлый оттенок основного цвета */
+    transform: scale(1.1);
+}
+
+.delete-btn:hover {
+    background: #D2B4DE; /* Светлый оттенок основного цвета */
+    transform: scale(1.1);
+}
+/* Стили формы редактирования статьи - идентично форме добавления */
+.article-edit-form {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(66, 34, 83, 0.1);
+    margin: 20px 0;
+}
+
+.article-edit-form .form-group {
+    margin-bottom: 20px;
+}
+
+.article-edit-form .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #422253;
+    font-size: 0.9em;
+}
+
+.article-edit-form .form-group input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+    background: white;
+}
+
+.article-edit-form .form-group input:focus {
+    border-color: #904AB5;
+    box-shadow: 0 0 0 2px rgba(144, 74, 181, 0.2);
+    outline: none;
+}
+
+/* Контейнер для CKEditor */
+.article-edit-form .editor-container {
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+}
+
+/* Стили для CKEditor тулбара */
+.article-edit-form .ck.ck-toolbar {
+    background: #5C2F74;
+    border: 1px solid #422253 !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 4px 8px !important;
+}
+
+.article-edit-form .ck.ck-button {
+    color: white !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.article-edit-form .ck.ck-button:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+.article-edit-form .ck.ck-button:active,
+.article-edit-form .ck.ck-button.ck-on {
+    background: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Поле ввода CKEditor */
+.article-edit-form .ck.ck-editor__editable {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0 0 8px 8px !important;
+    border-top: none !important;
+    min-height: 300px !important;
+    padding: 16px !important;
+    transition: border-color 0.3s ease !important;
+}
+
+.article-edit-form .ck.ck-editor__editable.ck-focused {
+    border-color: #904AB5 !important;
+    box-shadow: 0 0 0 2px rgba(144, 74, 181, 0.2) !important;
+    outline: none !important;
+}
+
+/* Кнопки формы */
+.article-edit-form .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.article-edit-form .btn-cancel,
+.article-edit-form .btn-submit {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.article-edit-form .btn-cancel {
+    background: #6c757d;
+    color: white;
+}
+
+.article-edit-form .btn-cancel:hover {
+    background: #5a6268;
+}
+
+.article-edit-form .btn-submit {
+    background: linear-gradient(135deg, #6C3483 0%, #422253 100%);
+    color: white;
+}
+
+.article-edit-form .btn-submit:hover {
+    box-shadow: 0 2px 12px rgba(66, 34, 83, 0.4);
+    background: linear-gradient(135deg, #5A2D72 0%, #422253 100%);
+}
+
+/* Выпадающие списки CKEditor */
+.article-edit-form .ck.ck-dropdown__panel {
+    border: 1px solid #422253 !important;
+    border-radius: 6px !important;
+    background: white !important;
+}
+
+.article-edit-form .ck.ck-list__item .ck-button {
+    color: #422253 !important;
+    background: white !important;
+}
+
+.article-edit-form .ck.ck-list__item .ck-button:hover {
+    background: #f8f9fa !important;
+    color: #422253 !important;
+}
+
+.article-edit-form .ck.ck-list__item .ck-button.ck-on {
+    background: #904AB5 !important;
+    color: white !important;
+}
+
+/* Разделители в тулбаре */
+.article-edit-form .ck.ck-toolbar .ck-toolbar__separator {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
 </style>
 
 <script>
@@ -378,7 +565,7 @@ function loadArticleForm() {
                             '|',
                             'bold', 'italic', 'underline',
                             '|',
-                            'bulletedList', 'numberedList', 'blockQuote',
+                            'bulletedList', 'numberedList',
                             '|',
                             'insertTable', 'imageUpload',
                         ],
@@ -523,6 +710,252 @@ document.addEventListener('DOMContentLoaded', function() {
         loadSubtypeContent(docTypeId, subtypeId);
     }
 });
+// Инициализация CKEditor для редактирования
+function initializeArticleEditor(articleId) {
+    if (!window.ClassicEditor) {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js';
+        script.onload = function() {
+            createEditorInstance(articleId);
+        };
+        document.head.appendChild(script);
+    } else {
+        createEditorInstance(articleId);
+    }
+}
 
+function createEditorInstance(articleId) {
+    const textarea = document.getElementById(`edit-text-${articleId}`);
+    const editorContainer = document.getElementById(`editor-container-${articleId}`);
+
+    // Перемещаем textarea в контейнер редактора
+    editorContainer.appendChild(textarea);
+
+    ClassicEditor
+        .create(textarea, {
+            ckfinder: {
+                uploadUrl: null
+            },
+            toolbar: {
+                items: [
+                    'undo', 'redo',
+                    '|',
+                    'heading',
+                    '|',
+                    'bold', 'italic', 'underline',
+                    '|',
+                    'bulletedList', 'numberedList',
+                    '|',
+                    'insertTable', 'imageUpload',
+                ],
+                shouldNotGroupWhenFull: true
+            }
+        })
+        .then(editor => {
+            editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                return new MyUploadAdapter(loader);
+            };
+            window[`articleEditor_${articleId}`] = editor;
+        })
+        .catch(error => {
+            console.error('Ошибка инициализации CKEditor:', error);
+        });
+}
+
+// Функция редактирования статьи
+function editArticle(articleId) {
+    const articleItem = document.querySelector(`.article-item[data-article-id="${articleId}"]`);
+    const articleTitle = articleItem.querySelector('.article-main');
+    const articleText = articleItem.querySelector('.article-text');
+    const currentTitle = articleTitle.textContent;
+    const currentContent = articleText.innerHTML;
+
+    // Создаем форму редактирования с теми же классами что и форма добавления
+    const editForm = document.createElement('div');
+    editForm.className = 'article-edit-form';
+    editForm.innerHTML = `
+        <div class="form-group">
+            <label>Заголовок статьи:</label>
+            <input type="text" id="edit-title-${articleId}" value="${currentTitle}" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Текст статьи:</label>
+            <div id="editor-container-${articleId}" class="editor-container"></div>
+            <textarea id="edit-text-${articleId}" style="display: none;">${currentContent}</textarea>
+        </div>
+        <div class="form-actions">
+            <button type="button" class="btn-cancel" onclick="cancelEdit(${articleId})">Отмена</button>
+            <button type="button" class="btn-submit" onclick="saveArticle(${articleId})">Сохранить</button>
+        </div>
+    `;
+
+    // Заменяем содержимое на форму редактирования
+    articleTitle.style.display = 'none';
+    articleText.style.display = 'none';
+    articleItem.appendChild(editForm);
+
+    // Инициализируем CKEditor
+    initializeArticleEditor(articleId);
+}
+
+// Сохранение статьи
+function saveArticle(articleId) {
+    const editor = window[`articleEditor_${articleId}`];
+    if (!editor) {
+        alert('Редактор не загружен');
+        return;
+    }
+
+    const titleInput = document.getElementById(`edit-title-${articleId}`);
+    const title = titleInput ? titleInput.value : '';
+    const content = editor.getData();
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('text', content);
+
+    fetch(`article/${articleId}/edit/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Обновляем отображение статьи
+            const articleItem = document.querySelector(`.article-item[data-article-id="${articleId}"]`);
+            const articleTitle = articleItem.querySelector('.article-main');
+            const articleText = articleItem.querySelector('.article-text');
+            const editForm = articleItem.querySelector('.article-edit-form');
+
+            // Обновляем заголовок и текст
+            articleTitle.textContent = title;
+            articleText.innerHTML = content;
+
+            // ПОЛНОСТЬЮ удаляем форму редактирования
+            editForm.remove();
+
+            // ВОССТАНАВЛИВАЕМ отображение оригинальных элементов
+            articleTitle.style.display = 'block';
+            articleText.style.display = 'block';
+
+            // Обновляем дату изменения
+            const updatedSpan = articleItem.querySelector('.article-meta span:nth-child(2)');
+            if (updatedSpan) {
+                const now = new Date();
+                const formattedDate = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                updatedSpan.textContent = `Обновлено: ${formattedDate}`;
+            }
+
+            // Уничтожаем редактор
+            if (editor) {
+                editor.destroy().then(() => {
+                    delete window[`articleEditor_${articleId}`];
+                });
+            }
+
+            console.log('Статья обновлена!');
+        } else {
+            alert('Ошибка: ' + JSON.stringify(data.errors));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при сохранении');
+    });
+}
+
+// Отмена редактирования
+function cancelEdit(articleId) {
+    const articleItem = document.querySelector(`.article-item[data-article-id="${articleId}"]`);
+    const articleTitle = articleItem.querySelector('.article-main');
+    const articleText = articleItem.querySelector('.article-text');
+    const editForm = articleItem.querySelector('.article-edit-form');
+
+    // ПОЛНОСТЬЮ удаляем форму редактирования
+    editForm.remove();
+
+    // ВОССТАНАВЛИВАЕМ отображение оригинальных элементов
+    articleTitle.style.display = 'block';
+    articleText.style.display = 'block';
+
+    // Уничтожаем редактор
+    const editor = window[`articleEditor_${articleId}`];
+    if (editor) {
+        editor.destroy().then(() => {
+            delete window[`articleEditor_${articleId}`];
+        });
+    }
+}
+
+// Удаление статьи
+function deleteArticle(articleId) {
+    if (!confirm('Вы уверены, что хотите удалить эту статью?')) {
+        return;
+    }
+
+    // Ищем CSRF токен в основном документе
+    const csrfToken = getCSRFToken();
+
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', csrfToken);
+
+    fetch(`/documentation/article/${articleId}/delete/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const articleItem = document.querySelector(`.article-item[data-article-id="${articleId}"]`);
+            articleItem.remove();
+        } else {
+            alert('Ошибка при удалении');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при удалении');
+    });
+}
+
+// Вспомогательная функция для получения CSRF токена
+function getCSRFToken() {
+    // Ищем токен в разных возможных местах
+    const tokenFromMeta = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (tokenFromMeta) return tokenFromMeta;
+
+    const tokenFromInput = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    if (tokenFromInput) return tokenFromInput;
+
+    const tokenFromCookie = getCookie('csrftoken');
+    if (tokenFromCookie) return tokenFromCookie;
+
+    console.error('CSRF token not found');
+    return '';
+}
+
+// Функция для получения cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 </script>
 {% endblock %}
