@@ -41,7 +41,7 @@
                      changeId: {{ change.id }}
                    }))"
                    class="change-title-index">
-                    {{ change.title }}
+                    {{ change.title|truncatechars:100 }}
                 </a>
                 <span class="change-created-index">{{ change.created|date:"d.m.Y" }}</span>
             </div>
@@ -78,7 +78,7 @@
                      articleId: {{ article.id }}
                    }))"
                    class="article-title-index">
-                    {{ article.title }}
+                    {{ article.title|truncatechars:130 }}
                 </a>
                 <div class="change-dates-index">
                     <span class="article-created-index">Создано: {{ article.created|date:"d.m.Y" }}</span>
