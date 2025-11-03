@@ -10,4 +10,4 @@ class TaskFrom(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = ['number', 'created', 'name', 'priority', 'iteration', 'status', 'finished', 'user', 'result', 'comment']
+        fields = ['number', 'created', 'name', 'type', 'priority', 'iteration', 'status', 'finished', 'user', 'result', 'comment']

@@ -26,11 +26,12 @@ class TasksView(DataMixin, ListView):
         context['form'] = TaskFrom()
         context['status_choices'] = Task.STATUSES
         context['iteration_choices'] = Task.ITERATIONS
+        context['types_choices'] = Task.TYPES_OF_TASK
         context['users'] = get_user_model().objects.filter(is_superuser=0).order_by('first_name')
         return self.get_mixin_context(context)
 
     def get_queryset(self):
-        time_threshold = timezone.now() - timedelta(hours=72)
+        time_threshold = timezone.now() - timedelta(hours=7200) # ИЗМЕНИТЬ НА 72 НА ПРОДЕ, 7200 ДЛЯ ТЕСТА
         tasks = Task.objects.filter(
             Q(created__gte=time_threshold) |
             Q(status__in=['not_taken', 'in_progress', 'on_hold'])
@@ -67,6 +68,7 @@ def update_task(request, task_id):
                     'error': f'Неверный формат даты: {created_str}. Используйте ДД.ММ.ГГГГ ЧЧ:ММ'
                 })
 
+            task.type = request.POST.get('type')
             task.name = request.POST.get('name')
             task.priority = request.POST.get('priority') == 'true'
             task.iteration = int(request.POST.get('iteration'))

@@ -35,8 +35,9 @@ class IndexView(DataMixin, TemplateView):
         # Группируем задачи по дате создания
         tasks_by_date = defaultdict(int)
         for task in all_tasks:
-            if task.created.date() >= start_date:
-                tasks_by_date[task.created.date()] += 1
+            date_created = task.created.date()
+            if date_created >= start_date:
+                tasks_by_date[date_created] += 1
 
         # Заполняем все даты за последние 30 дней
         chart_data = []

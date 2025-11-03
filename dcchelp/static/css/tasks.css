@@ -1,0 +1,343 @@
+/* Убираем все отступы у контейнеров и формы */
+.tasks-container,
+.add-task-section,
+.tasks-list,
+#addTaskForm,
+#addTaskTable {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.add-task-title {
+    padding-top: 25px;
+    padding-left: 25px;
+    padding-bottom: 25px;
+    color: #422253;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+    text-align: left;
+}
+
+.tasks-title {
+    padding-top: 25px;
+    padding-left: 25px;
+    color: #422253;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+    text-align: center;
+}
+
+.tasks-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.tasks-table th, .tasks-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.tasks-table th {
+    background-color: #f2f2f2;
+    position: relative;
+    overflow: visible;
+    white-space: normal;
+    text-align: center;
+}
+
+.filter-input {
+    width: calc(100% - 10px);
+    margin-top: 5px;
+    padding: 2px 5px;
+    font-size: 12px;
+    box-sizing: border-box;
+    display: block;
+}
+
+/* Обновленные стили для столбцов с учетом 12 столбцов */
+.tasks-table th:nth-child(12),
+.tasks-table td:nth-child(12),
+#addTaskTable th:nth-child(12),
+#addTaskTable td:nth-child(12) {
+    width: 60px;
+    min-width: 60px;
+    max-width: 60px;
+    text-align: center;
+}
+
+.tasks-table th:nth-child(2),
+.tasks-table td:nth-child(2),
+
+#addTaskTable th:nth-child(2),
+#addTaskTable td:nth-child(2),
+#addTaskTable td:nth-child(9),
+#addTaskTable th:nth-child(9) {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    text-align: center;
+}
+
+.tasks-table td:nth-child(4),
+.tasks-table th:nth-child(4),
+.tasks-table td:nth-child(8),
+.tasks-table th:nth-child(8),
+.tasks-table th:nth-child(7),
+.tasks-table td:nth-child(7),
+#addTaskTable td:nth-child(8),
+#addTaskTable th:nth-child(8),
+#addTaskTable th:nth-child(7),
+#addTaskTable td:nth-child(7),
+#addTaskTable td:nth-child(4),
+#addTaskTable th:nth-child(4) {
+    width: 70px;
+    min-width: 70px;
+    max-width: 70px;
+    text-align: center;
+}
+
+.tasks-table th:nth-child(5),
+.tasks-table th:nth-child(6),
+.tasks-table td:nth-child(5),
+.tasks-table td:nth-child(6),
+#addTaskTable th:nth-child(5),
+#addTaskTable th:nth-child(6),
+#addTaskTable td:nth-child(5),
+#addTaskTable td:nth-child(6) {
+    width: 30px;
+    min-width: 30px;
+    max-width: 30px;
+    text-align: center;
+}
+
+/* Общие стили для центрирования */
+.tasks-table td:nth-child(2) .editable-field,
+.tasks-table td:nth-child(4) .editable-field,
+.tasks-table td:nth-child(5) .editable-field,
+.tasks-table td:nth-child(6) .editable-field,
+.tasks-table td:nth-child(7) .editable-field,
+.tasks-table td:nth-child(8) .editable-field,
+.tasks-table td:nth-child(12) .editable-field,
+#addTaskTable td:nth-child(2) .form-control,
+#addTaskTable td:nth-child(4) .form-control,
+#addTaskTable td:nth-child(5) .form-control,
+#addTaskTable td:nth-child(6) .form-control,
+#addTaskTable td:nth-child(7) .form-control,
+#addTaskTable td:nth-child(9) .form-control,
+#addTaskTable td:nth-child(8) .form-control,
+#addTaskTable td:nth-child(12) .form-control {
+    text-align: center;
+}
+
+.tasks-table td:nth-child(2) select,
+.tasks-table td:nth-child(5) select,
+.tasks-table td:nth-child(6) select,
+.tasks-table td:nth-child(7) select,
+.tasks-table td:nth-child(8) select,
+#addTaskTable td:nth-child(2) select,
+#addTaskTable td:nth-child(4) select,
+#addTaskTable td:nth-child(5) select,
+#addTaskTable td:nth-child(6) select,
+#addTaskTable td:nth-child(7) select,
+#addTaskTable td:nth-child(8) select,
+#addTaskTable td:nth-child(9) select {
+    text-align: center;
+    text-align-last: center;
+}
+
+/* Обновляем старый восьмой столбец (теперь девятый) */
+.tasks-table td:nth-child(9) {
+    width: 130px;
+    text-align: center;
+    padding: 0 !important;
+}
+
+.tasks-table td:nth-child(9) .editable-field,
+.tasks-table td:nth-child(9) .user-display {
+    padding: 8px 0 !important;
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* Общие стили для полей ввода */
+.tasks-table .editable-field,
+#addTaskTable .form-control {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    padding: 8px;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.tasks-table .editable-field:focus,
+#addTaskTable .form-control:focus {
+    outline: none;
+    background: #f8f9fa;
+}
+
+/* Общие стили для textarea */
+.tasks-table textarea.editable-field,
+#addTaskTable textarea.form-control {
+    resize: none;
+    min-height: 30px;
+    height: 30px;
+}
+
+/* Общие стили для select */
+.tasks-table select.editable-field,
+#addTaskTable select.form-control {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+}
+
+/* Общие стили для ячеек */
+.tasks-table td,
+#addTaskTable td {
+    padding: 0 !important;
+    position: relative;
+}
+
+.tasks-table td:hover,
+#addTaskTable td:hover {
+    background: #f8f9fa;
+}
+
+/* Стили статусов */
+.status-on_hold { background-color: #fcf003; }
+.status-in_progress { background-color: #FFD8B8; }
+.status-completed, .status-returned { background-color: #D8EED5; }
+.status-cancelled, .status-recalled { background-color: #EDE8F0; }
+.status-not_taken { background-color: #FAF7FB; }
+
+.priority-high { background-color: #fca5a5; }
+
+.iteration-non-zero { background-color: #fae8d9; }
+
+/* Стили пользователей - применяем к span */
+.user-1 { font-weight: bold; color: #2563EB; }
+.user-2 { font-weight: bold; color: #DC2626; }
+.user-3 { font-weight: bold; color: #059669; }
+.user-4 { font-weight: bold; color: #7C3AED; }
+.user-5 { font-weight: bold; color: #EA580C; }
+.user-6 { font-weight: bold; color: #DB2777; }
+.user-7 { font-weight: bold; color: #0369A1; }
+.user-8 { font-weight: bold; color: #0891B2; }
+.user-9 { font-weight: bold; color: #65A30D; }
+.user-10 { font-weight: bold; color: #9333EA; }
+.user-11 { font-weight: bold; color: #E11D48; }
+
+.user-display {
+    padding: 8px;
+    display: block;
+}
+
+.user-cell {
+    position: relative;
+    min-height: 40px;
+    padding: 0 !important;
+}
+
+.user-display {
+    padding: 8px;
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.user-select {
+    z-index: 1;
+    cursor: pointer;
+}
+
+.finished-cell {
+    position: relative;
+    min-height: 40px;
+    padding: 0 !important;
+    cursor: pointer;
+}
+
+.finished-display {
+    padding-top: 2px;
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+.finished-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    cursor: pointer;
+}
+
+.actions-container {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+/* Стили кнопок */
+.btn-save, .btn-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 3px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    color: #6C3483;
+}
+
+.btn-save:hover {
+    background: #E8DAEF;
+}
+
+.btn-delete:hover {
+    background: #D2B4DE;
+}
+
+.filters-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 0 0 10px 0;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.form-check-input {
+    margin-right: 8px;
+}
+
+.form-check-label {
+    font-weight: normal;
+    cursor: pointer;
+    user-select: none;
+}
