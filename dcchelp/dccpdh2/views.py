@@ -50,9 +50,9 @@ class IndexView(DataMixin, TemplateView):
             current_date += timedelta(days=1)
 
         return self.get_mixin_context(context,
-                                      changes=Change.objects.all()[:4],
+                                      changes=Change.objects.all()[:6],
 
-                                      articles=DocumentArticle.objects.order_by('-created').all()[:4],
+                                      articles=DocumentArticle.objects.order_by('-updated').all()[:4],
 
                                       active_tasks=tasks.count(),
                                       in_progress=tasks.filter(status='in_progress').count(),

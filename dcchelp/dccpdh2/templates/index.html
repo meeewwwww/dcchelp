@@ -77,10 +77,13 @@
                      subtypeId: {{ article.doc_sub_type_id }},
                      articleId: {{ article.id }}
                    }))"
-                   class="change-title-index">
+                   class="article-title-index">
                     {{ article.title }}
                 </a>
-                <span class="change-created-index">{{ article.created|date:"d.m.Y" }}</span>
+                <div class="change-dates-index">
+                    <span class="article-created-index">Создано: {{ article.created|date:"d.m.Y" }}</span>
+                    <span class="article-updated-index">Обновлено: {{ article.updated|date:"d.m.Y" }}</span>
+                </div>
             </div>
             {% empty %}
             <div class="change-item-index empty-index">
