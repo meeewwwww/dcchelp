@@ -11,6 +11,7 @@ urlpatterns = [
     path('', include('dccpdh2.urls')),
     path('', include('list_of_changes.urls')),
     path('', include('tasks.urls')),
+    path('documentation/', include('documentation.urls')),
 ] + debug_toolbar_urls()
 
 handler404 = page_not_found

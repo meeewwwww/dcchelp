@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'dccpdh2.apps.Dccpdh2Config',
+    'documentation.apps.DocumentationConfig',
     'list_of_changes.apps.ListOfChangesConfig',
     'tasks.apps.TasksConfig',
     'debug_toolbar',

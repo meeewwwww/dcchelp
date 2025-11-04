@@ -1,0 +1,437 @@
+.page-container {
+    display: flex;
+    flex: 1;
+}
+
+.categories-sidebar {
+    width: 20%;
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.categories-header {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border: 2px solid blue;
+}
+
+.categories-tree {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.category-item {
+    margin-bottom: 5px;
+}
+
+.category-main {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.category-main:hover {
+    background: #e9ecef;
+}
+
+.category-arrow {
+    margin-right: 8px;
+    transition: transform 0.3s ease;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.subcategories {
+    display: none;
+    margin-left: 20px;
+    margin-top: 5px;
+}
+
+.subcategories.show {
+    display: block;
+}
+
+.subcategory-item {
+    padding: 8px 12px;
+    margin: 2px 0;
+    background: white;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.subcategory-item:hover {
+    background: #A46BC2;
+    color: white;
+    border-left-color: #763D94;
+}
+
+.content-area {
+    width: 80%;
+    padding: 20px;
+    background: white;
+}
+
+/* Стили для кнопки добавления */
+.add-article-section {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+    align-self: stretch;
+}
+
+.add-article-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #904AB5 0%, #422253 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.add-article-btn:hover {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.highlighted-article {
+    background: #f0f0f0 !important;
+    border-radius: 8px !important;
+    outline: 2px solid #CCACDD !important; /* ← outline вместо border */
+    outline-offset: -2px !important; /* ← убираем отступ наружу */
+    transition: all 0s ease-in-out;
+}
+
+.highlighted-article.fade-out {
+    background: transparent !important;
+    outline: 2px solid transparent !important;
+    transition: all 0.5s ease-in-out !important; /* ← добавить и для исчезновения */
+}
+
+/* Кнопки тулбара */
+.ck.ck-toolbar {
+    background: #5C2F74;
+    border: 1px solid #422253 !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 4px 8px !important;
+}
+
+.ck.ck-button {
+    color: white !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.ck.ck-button:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+.ck.ck-button:active,
+.ck.ck-button.ck-on {
+    background: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.ck.ck-label {
+    display: none !important;
+}
+
+/* Разделители */
+.ck.ck-toolbar .ck-toolbar__separator {
+    background: rgba(255,  255, 255, 0.3) !important;
+}
+
+/* Поле ввода текста */
+.ck.ck-editor__editable {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0 0 8px 8px !important;
+    border-top: none !important;
+    min-height: 300px !important;
+    padding: 16px !important;
+    transition: border-color 0.3s ease !important;
+}
+
+/* Фокус на поле ввода */
+.ck.ck-editor__editable.ck-focused {
+    border-color: #904AB5 !important;
+    box-shadow: 0 0 0 2px rgba(144, 74, 181, 0.2) !important;
+    outline: none !important;
+}
+
+/* Вся форма с закругленными краями */
+#addArticleForm {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 12px rgba(66, 34, 83, 0.1) !important;
+}
+
+/* Группы полей формы */
+.form-group {
+    margin-bottom: 20px !important;
+}
+
+.form-group label {
+    font-weight: 600 !important;
+    color: #422253 !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+}
+
+/* Поля ввода формы */
+#addArticleForm input,
+#addArticleForm select {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 6px !important;
+    padding: 10px 12px !important;
+    width: 100% !important;
+    transition: border-color 0.3s ease !important;
+}
+
+#addArticleForm input:focus,
+#addArticleForm select:focus {
+    border-color: #904AB5 !important;
+    box-shadow: 0 0 0 2px rgba(144, 74, 181, 0.2) !important;
+    outline: none !important;
+}
+
+/* Выпадающие списки */
+/* Выпадающие списки CKEditor */
+.ck.ck-dropdown__panel {
+    border: 1px solid #422253 !important;
+    border-radius: 6px !important;
+    background: white !important;
+}
+
+/* Текст в выпадающих списках */
+.ck.ck-list__item .ck-button {
+    color: #422253 !important;
+    background: white !important;
+}
+
+.ck.ck-list__item .ck-button:hover {
+    background: #f8f9fa !important;
+    color: #422253 !important;
+}
+
+/* Активный элемент в списке */
+.ck.ck-list__item .ck-button.ck-on {
+    background: #904AB5 !important;
+    color: white !important;
+}
+
+/* Текст в инпутах */
+.ck.ck-input-text {
+    color: #422253 !important;
+    background: white !important;
+}
+
+/* Подсказки/лейблы в формах редактора */
+.ck.ck-labeled-field-view .ck-labeled-field-view__label {
+    color: #422253 !important;
+}
+
+/* Иконки в выпадающих списках */
+.ck.ck-icon {
+    color: white !important;
+}
+
+.article-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.article-actions {
+    display: flex;
+    gap: 5px;
+    margin-left: 10px;
+}
+
+.edit-btn, .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background-color 0.3s;
+    color: #6C3483; /* Оттенок основного цвета */
+}
+
+.edit-btn:hover {
+    background: #E8DAEF; /* Очень светлый оттенок основного цвета */
+    transform: scale(1.1);
+}
+
+.delete-btn:hover {
+    background: #D2B4DE; /* Светлый оттенок основного цвета */
+    transform: scale(1.1);
+}
+/* Стили формы редактирования статьи - идентично форме добавления */
+.article-edit-form {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(66, 34, 83, 0.1);
+    margin: 20px 0;
+}
+
+.article-edit-form .form-group {
+    margin-bottom: 20px;
+}
+
+.article-edit-form .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #422253;
+    font-size: 0.9em;
+}
+
+.article-edit-form .form-group input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+    background: white;
+}
+
+.article-edit-form .form-group input:focus {
+    border-color: #904AB5;
+    box-shadow: 0 0 0 2px rgba(144, 74, 181, 0.2);
+    outline: none;
+}
+
+/* Контейнер для CKEditor */
+.article-edit-form .editor-container {
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+}
+
+/* Стили для CKEditor тулбара */
+.article-edit-form .ck.ck-toolbar {
+    background: #5C2F74;
+    border: 1px solid #422253 !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 4px 8px !important;
+}
+
+.article-edit-form .ck.ck-button {
+    color: white !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.article-edit-form .ck.ck-button:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+.article-edit-form .ck.ck-button:active,
+.article-edit-form .ck.ck-button.ck-on {
+    background: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Поле ввода CKEditor */
+.article-edit-form .ck.ck-editor__editable {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0 0 8px 8px !important;
+    border-top: none !important;
+    min-height: 300px !important;
+    padding: 16px !important;
+    transition: border-color 0.3s ease !important;
+}
+
+.article-edit-form .ck.ck-editor__editable.ck-focused {
+    border-color: #904AB5 !important;
+    box-shadow: 0 0 0 2px rgba(144, 74, 181, 0.2) !important;
+    outline: none !important;
+}
+
+/* Кнопки формы */
+.article-edit-form .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.article-edit-form .btn-cancel,
+.article-edit-form .btn-submit {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.article-edit-form .btn-cancel {
+    background: #6c757d;
+    color: white;
+}
+
+.article-edit-form .btn-cancel:hover {
+    background: #5a6268;
+}
+
+.article-edit-form .btn-submit {
+    background: linear-gradient(135deg, #6C3483 0%, #422253 100%);
+    color: white;
+}
+
+.article-edit-form .btn-submit:hover {
+    box-shadow: 0 2px 12px rgba(66, 34, 83, 0.4);
+    background: linear-gradient(135deg, #5A2D72 0%, #422253 100%);
+}
+
+/* Выпадающие списки CKEditor */
+.article-edit-form .ck.ck-dropdown__panel {
+    border: 1px solid #422253 !important;
+    border-radius: 6px !important;
+    background: white !important;
+}
+
+.article-edit-form .ck.ck-list__item .ck-button {
+    color: #422253 !important;
+    background: white !important;
+}
+
+.article-edit-form .ck.ck-list__item .ck-button:hover {
+    background: #f8f9fa !important;
+    color: #422253 !important;
+}
+
+.article-edit-form .ck.ck-list__item .ck-button.ck-on {
+    background: #904AB5 !important;
+    color: white !important;
+}
+
+/* Разделители в тулбаре */
+.article-edit-form .ck.ck-toolbar .ck-toolbar__separator {
+    background: rgba(255, 255, 255, 0.3) !important;
+}

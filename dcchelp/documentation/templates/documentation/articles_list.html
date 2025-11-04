@@ -1,7 +1,7 @@
 {% load static %}
 
 <div class="content-subtitle" style="color: #6c757d; font-size: 0.9em; margin-bottom: 10px;">
-    {{ doc_type_name }} - {{ subtype_name }}
+    {{ doc_type_name }} / {{ subtype_name }}
 </div>
 
 {% for article in articles %}
@@ -31,7 +31,7 @@
 </div>
 {% empty %}
 <div class="no-articles">
-    <p>Статьи для этого подтипа пока не добавлены</p>
+    <p>Заметки для этого подтипа пока не добавлены</p>
 </div>
 {% endfor %}
 

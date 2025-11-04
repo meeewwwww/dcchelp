@@ -1,7 +1,7 @@
 from django import forms
 from django_ckeditor_5.widgets import CKEditor5Widget
 
-from .models import DocumentArticle, DocumentSubType, DocumentTypes
+from documentation.models import DocumentTypes, DocumentSubType, DocumentArticle
 
 
 class DocumentArticleForm(forms.ModelForm):
