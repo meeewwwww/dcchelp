@@ -1,0 +1,631 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/documentation.css' %}">
+
+<div class="page-container">
+    <div class="categories-sidebar">
+        <div class="categories-header">
+            <a href="{% url 'documentation' %}" class="back-btn" style="
+                width: 100%;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                padding: 12px 0;
+                background: linear-gradient(135deg, #904AB5 0%, #422253 100%);
+                color: white;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            ">
+                <span style="margin-right: 8px;">←</span> Вернуться в заметки
+            </a>
+        </div>
+
+        <div class="categories-tree">
+            <!-- Быстрое меню для навигации -->
+            <div class="quick-nav" style="margin-bottom: 20px;">
+                <h4 style="color: #5C2F74; margin-bottom: 10px;">Быстрый переход:</h4>
+                <button onclick="scrollToSection('create-type')" class="nav-btn" style="width: 100%; padding: 8px; margin-bottom: 5px; background: #E8DAEF; border: 1px solid #D2B4DE; border-radius: 4px; cursor: pointer;">
+                    1. Создать тип
+                </button>
+                <button onclick="scrollToSection('create-subtype')" class="nav-btn" style="width: 100%; padding: 8px; margin-bottom: 5px; background: #E8DAEF; border: 1px solid #D2B4DE; border-radius: 4px; cursor: pointer;">
+                    2. Создать подтип
+                </button>
+                <button onclick="scrollToSection('manage-relations')" class="nav-btn" style="width: 100%; padding: 8px; margin-bottom: 5px; background: #E8DAEF; border: 1px solid #D2B4DE; border-radius: 4px; cursor: pointer;">
+                    3. Управление связями
+                </button>
+                <button onclick="scrollToSection('existing-items')" class="nav-btn" style="width: 100%; padding: 8px; background: #E8DAEF; border: 1px solid #D2B4DE; border-radius: 4px; cursor: pointer;">
+                    4. Существующие элементы
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="edit-types-container">
+            <h2 style="color: #422253; margin-bottom: 25px;">Редактирование типов и подтипов заметок</h2>
+
+            <!-- 1. СОЗДАНИЕ ТИПА -->
+            <div id="create-type" class="form-section" style="margin-bottom: 40px;">
+                <h3 style="color: #5C2F74; margin-bottom: 20px; border-bottom: 2px solid #E8DAEF; padding-bottom: 10px;">
+                    <span style="background: #5C2F74; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px;">1</span>
+                    Создать новый тип
+                </h3>
+
+                <form id="addTypeForm" class="article-edit-form" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="type" value="true">
+
+                    <div class="form-group">
+                        <label for="id_ru_name">Русское наименование</label>
+                        {{ form_type.ru_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_en_name">Английское наименование</label>
+                        {{ form_type.en_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_ru_short">Короткое русское наименование</label>
+                        {{ form_type.ru_short }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_en_short">Короткое английское наименование</label>
+                        {{ form_type.en_short }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_sub_types">Связать с подтипами (можно выбрать несколько)</label>
+                        {{ form_type.sub_types }}
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="resetTypeForm()">Очистить</button>
+                        <button type="submit" class="btn-submit">Создать тип</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 2. СОЗДАНИЕ ПОДТИПА -->
+            <div id="create-subtype" class="form-section" style="margin-bottom: 40px;">
+                <h3 style="color: #5C2F74; margin-bottom: 20px; border-bottom: 2px solid #E8DAEF; padding-bottom: 10px;">
+                    <span style="background: #5C2F74; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px;">2</span>
+                    Создать новый подтип
+                </h3>
+
+                <form id="addSubtypeForm" class="article-edit-form" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="subtype" value="true">
+
+                    <div class="form-group">
+                        <label for="id_name">Название подтипа</label>
+                        {{ form_sub_type.name }}
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="resetSubtypeForm()">Очистить</button>
+                        <button type="submit" class="btn-submit">Создать подтип</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 3. УПРАВЛЕНИЕ СВЯЗЯМИ -->
+            <div id="manage-relations" class="form-section" style="margin-bottom: 40px;">
+                <h3 style="color: #5C2F74; margin-bottom: 20px; border-bottom: 2px solid #E8DAEF; padding-bottom: 10px;">
+                    <span style="background: #5C2F74; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px;">3</span>
+                    Управление связями типов и подтипов
+                </h3>
+
+                <div class="relations-manager" style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <div class="relation-form">
+                        <h4 style="color: #422253; margin-bottom: 15px;">Добавить связь</h4>
+                        <form id="addRelationForm" class="article-edit-form" method="post" style="margin-bottom: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="add_relation" value="true">
+
+                            <div style="display: flex; gap: 15px; align-items: end;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Тип</label>
+                                    <select id="relationType" name="type_id" class="form-control" required>
+                                        <option value="">-- Выберите тип --</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Подтип</label>
+                                    <select id="relationSubtype" name="subtype_id" class="form-control" required>
+                                        <option value="">-- Выберите подтип --</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" style="flex: 0;">
+                                    <button type="submit" class="btn-submit" style="min-width: 120px;">Добавить связь</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="existing-relations" style="margin-top: 25px;">
+                        <h4 style="color: #422253; margin-bottom: 15px;">Существующие связи</h4>
+                        <div id="relationsList" class="items-scrollable" style="max-height: 200px; overflow-y: auto; border: 1px solid #E8DAEF; border-radius: 6px; padding: 10px; background: white;">
+                            <p style="text-align: center; color: #6c757d;">Загрузка связей...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. СУЩЕСТВУЮЩИЕ ЭЛЕМЕНТЫ -->
+            <div id="existing-items" class="form-section">
+                <h3 style="color: #5C2F74; margin-bottom: 20px; border-bottom: 2px solid #E8DAEF; padding-bottom: 10px;">
+                    <span style="background: #5C2F74; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px;">4</span>
+                    Существующие элементы
+                </h3>
+
+                <div class="items-container" style="display: flex; gap: 20px;">
+                    <div class="types-list" style="flex: 1;">
+                        <h4 style="color: #5C2F74; margin-bottom: 15px;">Типы</h4>
+                        <div id="typesList" class="items-scrollable" style="max-height: 300px; overflow-y: auto; border: 1px solid #E8DAEF; border-radius: 6px; padding: 10px;">
+                            <p style="text-align: center; color: #6c757d;">Загрузка типов...</p>
+                        </div>
+                    </div>
+
+                    <div class="subtypes-list" style="flex: 1;">
+                        <h4 style="color: #5C2F74; margin-bottom: 15px;">Подтипы</h4>
+                        <div id="subtypesList" class="items-scrollable" style="max-height: 300px; overflow-y: auto; border: 1px solid #E8DAEF; border-radius: 6px; padding: 10px;">
+                            <p style="text-align: center; color: #6c757d;">Загрузка подтипов...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Функции для очистки форм
+    function resetTypeForm() {
+        document.getElementById('addTypeForm').reset();
+    }
+
+    function resetSubtypeForm() {
+        document.getElementById('addSubtypeForm').reset();
+    }
+
+    // Показывать/скрывать плавающую кнопку при скролле
+    window.addEventListener('scroll', function() {
+        const topBtn = document.getElementById('floatingTopBtn');
+        if (window.pageYOffset > 300) {
+            topBtn.style.display = 'flex';
+        } else {
+            topBtn.style.display = 'none';
+        }
+    });
+
+    // Функция для скролла к верху
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    function scrollToSection(sectionId) {
+        const element = document.getElementById(sectionId);
+        const offset = 80; // Отступ сверху для компенсации фиксированных элементов
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
+    }
+
+    // AJAX отправка форм
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeForm = document.getElementById('addTypeForm');
+        const subtypeForm = document.getElementById('addSubtypeForm');
+        const relationForm = document.getElementById('addRelationForm');
+
+        if (typeForm) {
+            typeForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitForm(this, 'type');
+            });
+        }
+
+        if (subtypeForm) {
+            subtypeForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitForm(this, 'subtype');
+            });
+        }
+
+        if (relationForm) {
+            relationForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                addRelation();
+            });
+        }
+
+        // Загрузка существующих типов, подтипов и связей
+        loadExistingItems();
+        loadRelations();
+    });
+
+    function submitForm(form, formType) {
+        const formData = new FormData(form);
+
+        fetch('{% url "edit_types" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                form.reset();
+                loadExistingItems(); // Обновляем списки
+                loadRelations(); // Обновляем связи
+            } else {
+                alert('Ошибка при создании: ' + JSON.stringify(data.errors));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при отправке формы');
+        });
+    }
+
+    function addRelation() {
+        const typeId = document.getElementById('relationType').value;
+        const subtypeId = document.getElementById('relationSubtype').value;
+
+        if (!typeId || !subtypeId) {
+            alert('Пожалуйста, выберите тип и подтип');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('add_relation', 'true');
+        formData.append('type_id', typeId);
+        formData.append('subtype_id', subtypeId);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        fetch('{% url "edit_types" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('addRelationForm').reset();
+                loadRelations(); // Обновляем список связей
+                loadExistingItems(); // Обновляем общие списки
+            } else {
+                alert('Ошибка при добавлении связи: ' + JSON.stringify(data.errors));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при добавлении связи');
+        });
+    }
+
+    function loadExistingItems() {
+        // Загрузка существующих типов
+        fetch('{% url "get_types" %}')
+            .then(response => response.json())
+            .then(data => {
+                const typesList = document.getElementById('typesList');
+                const relationTypeSelect = document.getElementById('relationType');
+
+                if (data.types && data.types.length > 0) {
+                    // Заполняем список типов
+                    typesList.innerHTML = data.types.map(type => `
+                        <div class="type-item" style="padding: 8px; margin-bottom: 5px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #5C2F74; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${type.ru_name}</strong> (${type.en_name})
+                                <br><small>Подтипы: ${type.sub_types_count || 0}</small>
+                            </div>
+                            <button class="delete-btn" onclick="deleteType(${type.id})" title="Удалить тип">
+                                <svg style="display: block; position: relative; top: 1px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                </svg>
+                            </button>
+                        </div>
+                    `).join('');
+
+                    // Заполняем выпадающий список для связей
+                    relationTypeSelect.innerHTML = '<option value="">-- Выберите тип --</option>' +
+                        data.types.map(type => `
+                            <option value="${type.id}">${type.ru_name}</option>
+                        `).join('');
+                } else {
+                    typesList.innerHTML = '<p style="text-align: center; color: #6c757d;">Типы не найдены</p>';
+                    relationTypeSelect.innerHTML = '<option value="">-- Типы не найдены --</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading types:', error);
+                document.getElementById('typesList').innerHTML = '<p style="text-align: center; color: #dc3545;">Ошибка загрузки типов</p>';
+            });
+
+        // Загрузка существующих подтипов
+        fetch('{% url "get_all_subtypes" %}')
+            .then(response => response.json())
+            .then(data => {
+                const subtypesList = document.getElementById('subtypesList');
+                const relationSubtypeSelect = document.getElementById('relationSubtype');
+
+                if (data.subtypes && data.subtypes.length > 0) {
+                    // Заполняем список подтипов
+                    subtypesList.innerHTML = data.subtypes.map(subtype => `
+                        <div class="subtype-item" style="padding: 8px; margin-bottom: 5px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #A46BC2; display: flex; justify-content: space-between; align-items: center;">
+                            <span>${subtype.name}</span>
+                            <button class="delete-btn" onclick="deleteSubtype(${subtype.id})" title="Удалить подтип">
+                                <svg style="display: block; position: relative; top: 1px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                </svg>
+                            </button>
+                        </div>
+                    `).join('');
+
+                    // Заполняем выпадающий список для связей
+                    relationSubtypeSelect.innerHTML = '<option value="">-- Выберите подтип --</option>' +
+                        data.subtypes.map(subtype => `
+                            <option value="${subtype.id}">${subtype.name}</option>
+                        `).join('');
+                } else {
+                    subtypesList.innerHTML = '<p style="text-align: center; color: #6c757d;">Подтипы не найдены</p>';
+                    relationSubtypeSelect.innerHTML = '<option value="">-- Подтипы не найдены --</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading subtypes:', error);
+                document.getElementById('subtypesList').innerHTML = '<p style="text-align: center; color: #dc3545;">Ошибка загрузки подтипов</p>';
+            });
+    }
+
+    function loadRelations() {
+        // Загрузка существующих связей
+        fetch('{% url "get_relations" %}')
+            .then(response => response.json())
+            .then(data => {
+                const relationsList = document.getElementById('relationsList');
+                if (data.relations && data.relations.length > 0) {
+                    relationsList.innerHTML = data.relations.map(relation => `
+                        <div class="relation-item" style="padding: 8px; margin-bottom: 5px; background: white; border-radius: 4px; border: 1px solid #E8DAEF; display: flex; justify-content: space-between; align-items: center;">
+                            <span>
+                                <strong>${relation.type_name}</strong> → ${relation.subtype_name}
+                            </span>
+                            <button class="delete-btn" onclick="deleteRelation(${relation.type_id}, ${relation.subtype_id})" title="Удалить связь">
+                                <svg style="display: block; position: relative; top: 1px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                </svg>
+                            </button>
+                        </div>
+                    `).join('');
+                } else {
+                    relationsList.innerHTML = '<p style="text-align: center; color: #6c757d;">Связи не найдены</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading relations:', error);
+                relationsList.innerHTML = '<p style="text-align: center; color: #dc3545;">Ошибка загрузки связей</p>';
+            });
+    }
+
+    function deleteRelation(typeId, subtypeId) {
+        if (!confirm('Удалить эту связь?')) return;
+
+        const formData = new FormData();
+        formData.append('delete_relation', 'true');
+        formData.append('type_id', typeId);
+        formData.append('subtype_id', subtypeId);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        fetch('{% url "edit_types" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadRelations();
+                loadExistingItems();
+            } else {
+                alert('Ошибка при удалении связи');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при удалении связи');
+        });
+    }
+
+    function deleteType(typeId) {
+        if (!confirm('Удалить этот тип? Это также удалит все связанные подтипы и заметки о документации.')) return;
+
+        const formData = new FormData();
+        formData.append('delete_type', 'true');
+        formData.append('type_id', typeId);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        fetch('{% url "edit_types" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadExistingItems();
+                loadRelations();
+            } else {
+                alert('Ошибка при удалении типа');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при удалении типа');
+        });
+    }
+
+    function deleteSubtype(subtypeId) {
+        if (!confirm('Удалить этот подтип? Это также удалит все связанные заметки о документации.')) return;
+
+        const formData = new FormData();
+        formData.append('delete_subtype', 'true');
+        formData.append('subtype_id', subtypeId);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        fetch('{% url "edit_types" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadExistingItems();
+                loadRelations();
+            } else {
+                alert('Ошибка при удалении подтипа');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при удалении подтипа');
+        });
+    }
+</script>
+
+<style>
+    .back-btn:hover {
+        box-shadow: 0 2px 8px rgba(108, 52, 131, 0.4);
+        transform: translateY(-1px);
+    }
+
+    .nav-btn:hover {
+        background: #D2B4DE !important;
+    }
+
+    .items-scrollable::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .items-scrollable::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .items-scrollable::-webkit-scrollbar-thumb {
+        background: #A46BC2;
+        border-radius: 3px;
+    }
+
+    .items-scrollable::-webkit-scrollbar-thumb:hover {
+        background: #904AB5;
+    }
+
+    #addTypeForm input,
+    #addTypeForm select,
+    #addSubtypeForm input,
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+        box-sizing: border-box;
+        background: white;
+    }
+
+    #addTypeForm input:focus,
+    #addTypeForm select:focus,
+    #addSubtypeForm input:focus,
+    .form-control:focus {
+        border-color: #904AB5;
+        outline: none;
+    }
+
+    #id_sub_types {
+        min-height: 120px;
+    }
+
+    .form-section {
+        scroll-margin-top: 20px;
+    }
+
+    .delete-btn:hover {
+        background: #f8d7da !important;
+        border-radius: 3px;
+    }
+
+    #floatingTopBtn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        background: linear-gradient(135deg, #904AB5 0%, #422253 100%);
+    }
+
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 768px) {
+        #floatingTopBtn {
+            left: 15px;
+            bottom: 70px;
+            width: 45px;
+            height: 45px;
+            font-size: 18px;
+        }
+    }
+
+    #id_en_name + label::after,
+    #id_ru_short + label::after,
+    #id_en_short + label::after {
+    display: none !important;
+    }
+</style>
+
+<div id="floatingTopBtn" style="
+    position: fixed;
+    bottom: 80px; /* Выше, чтобы не перекрывалось футером */
+    left: 30px; /* Слева вместо справа */
+    background: linear-gradient(135deg, #904AB5 0%, #422253 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+" onclick="scrollToTop()" title="Вернуться наверх">
+    ↑
+</div>
+
+{% endblock %}

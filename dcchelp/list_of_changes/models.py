@@ -8,7 +8,7 @@ class Change(models.Model):
 
     number = models.IntegerField()
     title = models.CharField(max_length=255, verbose_name='Название')
-    text = models.TextField(max_length=1000, blank=True, verbose_name='Содержание')
+    text = models.TextField(max_length=1000, verbose_name='Содержание')
     created = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
     updated = models.DateTimeField(auto_now=True, verbose_name='Изменено')
     active = models.BooleanField(choices=tuple(map(lambda x: (bool(x[0]), x[1]), Status.choices)),

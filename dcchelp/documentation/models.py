@@ -4,9 +4,9 @@ from django_ckeditor_5.fields import CKEditor5Field
 
 class DocumentTypes(models.Model):
     ru_name = models.CharField(max_length=255)
-    en_name = models.CharField(max_length=255)
-    ru_short = models.CharField(max_length=5)
-    en_short = models.CharField(max_length=5)
+    en_name = models.CharField(max_length=255, blank=True, null=True)
+    ru_short = models.CharField(max_length=5, blank=True, null=True)
+    en_short = models.CharField(max_length=5, blank=True, null=True)
     sub_types = models.ManyToManyField('DocumentSubType', related_name='doc_types', blank=True)
 
     def __str__(self):

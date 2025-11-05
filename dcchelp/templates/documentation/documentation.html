@@ -32,9 +32,10 @@
             <button class="add-article-btn" onclick="openArticleForm()">
                 + Добавить заметку
             </button>
-        </div><!-- Кнопка редактирования типов / подтипов -->
+        </div>
+
         <div class="add-article-section">
-            <button class="add-article-btn" onclick="openArticleForm()">
+            <button class="add-article-btn" onclick="window.location.href='{% url 'edit_types' %}'">
                 Редактировать типы / подтипы
             </button>
         </div>
@@ -52,7 +53,6 @@
 </div>
 
 <script>
-
 // Остальные функции для дерева категорий
 function toggleSubcategories(element) {
     const subcategories = element.nextElementSibling;
@@ -109,6 +109,33 @@ class MyUploadAdapter {
     }
 }
 
+
+// ОБЩАЯ ФУНКЦИЯ ДЛЯ ПРОВЕРКИ И ПОДСВЕТКИ РЕДАКТОРА
+function validateEditor(editor) {
+    const editorData = editor.getData();
+
+    if (!editorData.trim()) {
+        // Фокус на редактируемый элемент CKEditor
+        const editableElement = editor.ui.view.editable.element;
+
+        // Даем немного времени на рендеринг и фокусируем
+        setTimeout(() => {
+            editableElement.focus();
+            // Дополнительно прокручиваем к редактору
+            editableElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+
+        return false;
+    }
+    return true;
+}
+
+// ФУНКЦИЯ ДЛЯ ПОДСВЕТКИ ПОЛЯ
+function highlightField(field) {
+    if (!field) return;
+    field.focus(); // Просто фокусируем поле
+}
+
 function loadArticleForm() {
     fetch('/documentation/add-article/')
         .then(response => response.json())
@@ -116,40 +143,7 @@ function loadArticleForm() {
             document.getElementById('content-title').textContent = 'Добавить статью';
             document.getElementById('content-body').innerHTML = data.content;
 
-            setTimeout(() => {
-            const textarea = document.getElementById('id_text');
-            if (textarea && window.ClassicEditor) {
-                ClassicEditor
-                .create(textarea, {
-                    ckfinder: {
-                        uploadUrl: null
-                    },
-                    toolbar: {
-                        items: [
-                            'undo', 'redo',
-                            '|',
-                            'heading',
-                            '|',
-                            'bold', 'italic', 'underline',
-                            '|',
-                            'bulletedList', 'numberedList',
-                            '|',
-                            'insertTable', 'imageUpload',
-                        ],
-                        shouldNotGroupWhenFull: true
-                    }
-                })
-                .then(editor => {
-                    // Явно включаем Base64 адаптер
-                    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
-                        return new MyUploadAdapter(loader);
-                    };
-                    console.log('CKEditor создан!', editor);
-                    window.articleEditor = editor;
-                })
-            }
-        }, 100);
-
+            // ОРИГИНАЛЬНЫЙ КОД ДЛЯ SELECT'ОВ
             const docTypeSelect = document.getElementById('id_doc_type');
 
             if (docTypeSelect) {
@@ -177,44 +171,57 @@ function loadArticleForm() {
                 });
             }
 
-            // ДОБАВЛЯЕМ ОБРАБОТКУ ОТПРАВКИ ФОРМЫ
+            // Инициализация редактора
+            setTimeout(() => {
+                const textarea = document.getElementById('id_text');
+                if (textarea && window.ClassicEditor) {
+                    ClassicEditor.create(textarea, {
+                        ckfinder: {
+                            uploadUrl: null
+                        },
+                        toolbar: {
+                            items: [
+                                'undo', 'redo',
+                                '|',
+                                'heading',
+                                '|',
+                                'bold', 'italic', 'underline',
+                                '|',
+                                'bulletedList', 'numberedList',
+                                '|',
+                                'insertTable', 'imageUpload',
+                            ],
+                            shouldNotGroupWhenFull: true
+                        }
+                    })
+                    .then(editor => {
+                        editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                            return new MyUploadAdapter(loader);
+                        };
+                        window.articleEditor = editor;
+                        textarea.removeAttribute('required'); // Убираем required для CKEditor
+                    })
+                    .catch(error => {
+                        console.error('Ошибка создания CKEditor:', error);
+                    });
+                }
+            }, 100);
+
+            // ОБРАБОТЧИК ОТПРАВКИ ФОРМЫ - ТОЛЬКО ДЛЯ CKEDITOR
             const form = document.getElementById('addArticleForm');
             if (form) {
                 form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-
-                    // ОБЯЗАТЕЛЬНО обновить textarea данными из редактора
+                    // ВАЛИДАЦИЯ ТОЛЬКО РЕДАКТОРА
                     if (window.articleEditor) {
-                        const editorData = window.articleEditor.getData();
-                        const textarea = document.getElementById('id_text'); // ← ПЕРЕМЕСТИ СЮДА
-                        textarea.value = editorData;
-                        console.log("Textarea обновлен:", textarea.value);
+                        const textarea = document.getElementById('id_text');
+                        textarea.value = window.articleEditor.getData();
+
+                        if (!validateEditor(window.articleEditor)) {
+                            e.preventDefault();
+                            return;
+                        }
                     }
-
-                    const formData = new FormData(form);
-                    console.log("Отправляемые данные:", Array.from(formData.entries()));
-
-                    fetch('/documentation/add-article/', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Статья сохранена!');
-                            window.location.href = '/documentation/';
-                        } else {
-                            alert('Ошибка: ' + JSON.stringify(data.errors));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Произошла ошибка при отправке');
-                    });
+                    // Для остальных полей работает стандартная браузерная валидация
                 });
             }
         })
@@ -277,6 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loadSubtypeContent(docTypeId, subtypeId);
     }
 });
+
 // Инициализация CKEditor для редактирования
 function initializeArticleEditor(articleId) {
     if (!window.ClassicEditor) {
@@ -296,7 +304,9 @@ function createEditorInstance(articleId) {
     const editorContainer = document.getElementById(`editor-container-${articleId}`);
 
     // Перемещаем textarea в контейнер редактора
-    editorContainer.appendChild(textarea);
+    if (textarea && editorContainer) {
+        editorContainer.appendChild(textarea);
+    }
 
     ClassicEditor
         .create(textarea, {
@@ -323,6 +333,11 @@ function createEditorInstance(articleId) {
                 return new MyUploadAdapter(loader);
             };
             window[`articleEditor_${articleId}`] = editor;
+
+            // Убираем required атрибут
+            if (textarea) {
+                textarea.removeAttribute('required');
+            }
         })
         .catch(error => {
             console.error('Ошибка инициализации CKEditor:', error);
@@ -332,6 +347,15 @@ function createEditorInstance(articleId) {
 // Функция редактирования статьи
 function editArticle(articleId) {
     const articleItem = document.querySelector(`.article-item[data-article-id="${articleId}"]`);
+
+    // Проверяем, не открыта ли уже форма редактирования
+    const existingEditForm = articleItem.querySelector('.article-edit-form');
+    if (existingEditForm) {
+        // Если форма уже открыта - закрываем её (как отмена)
+        cancelEdit(articleId);
+        return;
+    }
+
     const articleTitle = articleItem.querySelector('.article-main');
     const articleText = articleItem.querySelector('.article-text');
     const currentTitle = articleTitle.textContent;
@@ -342,11 +366,11 @@ function editArticle(articleId) {
     editForm.className = 'article-edit-form';
     editForm.innerHTML = `
         <div class="form-group">
-            <label>Заголовок статьи:</label>
+            <label>Заголовок:</label>
             <input type="text" id="edit-title-${articleId}" value="${currentTitle}" class="form-control">
         </div>
         <div class="form-group">
-            <label>Текст статьи:</label>
+            <label>Содержание:</label>
             <div id="editor-container-${articleId}" class="editor-container"></div>
             <textarea id="edit-text-${articleId}" style="display: none;">${currentContent}</textarea>
         </div>
@@ -374,57 +398,58 @@ function saveArticle(articleId) {
     }
 
     const titleInput = document.getElementById(`edit-title-${articleId}`);
-    const title = titleInput ? titleInput.value : '';
-    const content = editor.getData();
+    const title = titleInput?.value.trim() || '';
 
+    // ВАЛИДАЦИЯ ТОЛЬКО РЕДАКТОРА
+    if (!validateEditor(editor)) {  // ← передаем правильный редактор
+        return;
+    }
+
+    // Если заголовок пустой - простая проверка
+    if (!title) {
+        titleInput.focus();
+        return;
+    }
+
+    const content = editor.getData();
     const formData = new FormData();
     formData.append('title', title);
     formData.append('text', content);
 
-    fetch(`article/${articleId}/edit/`, {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+
+    fetch(`/documentation/article/${articleId}/edit/`, {
         method: 'POST',
         body: formData,
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': getCSRFToken()
+            'X-CSRFToken': csrfToken
         }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Обновляем отображение статьи
+            // Обновляем статью
             const articleItem = document.querySelector(`.article-item[data-article-id="${articleId}"]`);
             const articleTitle = articleItem.querySelector('.article-main');
             const articleText = articleItem.querySelector('.article-text');
             const editForm = articleItem.querySelector('.article-edit-form');
 
-            // Обновляем заголовок и текст
             articleTitle.textContent = title;
             articleText.innerHTML = content;
-
-            // ПОЛНОСТЬЮ удаляем форму редактирования
             editForm.remove();
+            articleTitle.style.display = articleText.style.display = 'block';
 
-            // ВОССТАНАВЛИВАЕМ отображение оригинальных элементов
-            articleTitle.style.display = 'block';
-            articleText.style.display = 'block';
-
-            // Обновляем дату изменения
+            // Обновляем дату
             const updatedSpan = articleItem.querySelector('.article-meta span:nth-child(2)');
             if (updatedSpan) {
-                const now = new Date();
-                const formattedDate = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-                updatedSpan.textContent = `Обновлено: ${formattedDate}`;
+                updatedSpan.textContent = `Обновлено: ${new Date().toLocaleString()}`;
             }
 
             // Уничтожаем редактор
-            if (editor) {
-                editor.destroy().then(() => {
-                    delete window[`articleEditor_${articleId}`];
-                });
-            }
-
-            console.log('Статья обновлена!');
+            editor.destroy().then(() => {
+                delete window[`articleEditor_${articleId}`];
+            });
         } else {
             alert('Ошибка: ' + JSON.stringify(data.errors));
         }
@@ -435,12 +460,30 @@ function saveArticle(articleId) {
     });
 }
 
+
+// Также вызываем при открытии форм
+function openArticleForm() {
+
+    if (!window.ClassicEditor) {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js';
+        script.onload = function() {
+            loadArticleForm();
+        };
+        document.head.appendChild(script);
+    } else {
+        loadArticleForm();
+    }
+}
+
 // Отмена редактирования
 function cancelEdit(articleId) {
     const articleItem = document.querySelector(`.article-item[data-article-id="${articleId}"]`);
     const articleTitle = articleItem.querySelector('.article-main');
     const articleText = articleItem.querySelector('.article-text');
     const editForm = articleItem.querySelector('.article-edit-form');
+
+    if (!editForm) return;
 
     // ПОЛНОСТЬЮ удаляем форму редактирования
     editForm.remove();
@@ -482,7 +525,9 @@ function deleteArticle(articleId) {
     .then(data => {
         if (data.success) {
             const articleItem = document.querySelector(`.article-item[data-article-id="${articleId}"]`);
-            articleItem.remove();
+            if (articleItem) {
+                articleItem.remove();
+            }
         } else {
             alert('Ошибка при удалении');
         }

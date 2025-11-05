@@ -700,7 +700,15 @@ form .form-group textarea:focus {
     border: 1px solid #e9ecef;
 }
 
-.form-group label[for*="id_"]:after {
+.form-group label[for="id_ru_name"]:after,
+.form-group label[for="id_title"]:after,
+.form-group label[for="id_name"]:after,
+.form-group label[for="id_text"]:after,
+.form-group label[for="id_doc_sub_type"]:after,
+.form-group label[for="id_doc_type"]:after,
+.form-group label[for="text"]:after,
+.form-group label[for="number"]:after,
+.form-group label[for="title"]:after {
     content: " *";
     color: #dc3545;
 }
