@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% load html_filters %}
+
+{% block content %}
+<div class="search-results-container">
+    <div class="search-header">
+        <h1>Результаты поиска</h1>
+        <p class="search-query">По запросу: "<span class="query-text">{{ query }}</span>"</p>
+    </div>
+
+    {% if changes or articles or tasks %}
+        <!-- Changes Results -->
+        {% if changes %}
+        <section class="search-section">
+            <h2 class="section-title">Пункты листа изменений</h2>
+            <div class="changes-results">
+                {% for change in changes %}
+                <div class="search-result-card change-result">
+                    <a href="/list_of_changes/"
+                       class="result-link"
+                       onclick="sessionStorage.setItem('loadChangeData', JSON.stringify({changeId: {{ change.id }}}))">
+                        <div class="result-header">
+                            <span class="change-number">{{ change.number }}</span>
+                            <span class="result-title">
+                                {% with title=change.title %}
+                                    {{ title|highlight_search:query }}
+                                {% endwith %}
+                            </span>
+                        </div>
+                        <div class="result-text">
+                            {% with text=change.text|html_to_text %}
+                                {{ text|truncatechars:150|highlight_search:query }}
+                            {% endwith %}
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Articles Results -->
+        {% if articles %}
+        <section class="search-section">
+            <h2 class="section-title">Заметки</h2>
+            <div class="articles-results">
+                {% for article in articles %}
+                <div class="search-result-card article-result">
+                    <a href="/documentation/"
+                       class="result-link"
+                       onclick="sessionStorage.setItem('loadArticleData', JSON.stringify({docTypeId: {{ article.doc_type_id }}, subtypeId: {{ article.doc_sub_type_id }}, articleId: {{ article.id }}}))">
+                        <div class="result-header">
+                            <span class="result-title">
+                                {% with title=article.title %}
+                                    {{ title|highlight_search:query }}
+                                {% endwith %}
+                            </span>
+                        </div>
+                        <div class="result-text">
+                            {% with text=article.text|html_to_text %}
+                                {{ text|truncatechars:150|highlight_search:query }}
+                            {% endwith %}
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Tasks Results -->
+        {% if tasks %}
+        <section class="search-section">
+            <h2 class="section-title">Задачи</h2>
+            <div class="tasks-results">
+                <div class="table-container">
+                    <table class="tasks-table">
+                        <thead>
+                            <tr>
+                                <th>Номер заявки, PVA, TRM</th>
+                                <th>Время получения</th>
+                                <th>Наименование комплекта</th>
+                                <th>Тип</th>
+                                <th>Приоритет</th>
+                                <th>Итерация</th>
+                                <th>Статус</th>
+                                <th>Завершено</th>
+                                <th>Сотрудник ТДО</th>
+                                <th>Созданный процесс, TRM</th>
+                                <th>Комментарий</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in tasks %}
+                            <tr class="task-row">
+                                <td>
+                                    {% with number=task.number %}
+                                        {{ number|highlight_search:query }}
+                                    {% endwith %}
+                                </td>
+                                <td>{{ task.created }}</td>
+                                <td>
+                                    {% with name=task.name %}
+                                        {{ name|highlight_search:query }}
+                                    {% endwith %}
+                                </td>
+                                <td>{{ task.get_type_display }}</td>
+                                <td>{% if task.priority %}Да{% else %}Нет{% endif %}</td>
+                                <td>{{ task.iteration }}</td>
+                                <td>{{ task.get_status_display }}</td>
+                                <td>{% if task.finished %}{{ task.finished }}{% endif %}</td>
+                                <td>{{ task.user.first_name }} {{ task.user.last_name }}</td>
+                                <td>
+                                    {% with result=task.result %}
+                                        {{ result|highlight_search:query }}
+                                    {% endwith %}
+                                </td>
+                                <td>
+                                    {% with comment=task.comment %}
+                                        {{ comment|highlight_search:query }}
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+    {% else %}
+        <div class="no-results">
+            <h2>Ничего не найдено</h2>
+            <p>Попробуйте изменить запрос или использовать другие ключевые слова.</p>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.search-results-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.search-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.search-header h1 {
+    color: #422253;
+    font-size: 2rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.search-query {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.query-text {
+    color: #422253;
+    font-weight: 600;
+}
+
+.search-section {
+    margin-bottom: 40px;
+}
+
+.section-title {
+    color: #422253;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e9ecef;
+    font-weight: 600;
+}
+
+/* Changes and Articles Results Styles */
+.changes-results,
+.articles-results {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.search-result-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.result-link {
+    display: block;
+    padding: 20px 24px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.result-header {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.change-number {
+    background: #422253;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.result-title {
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    flex: 1;
+}
+
+.result-text {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-top: 8px;
+}
+
+/* Tasks Table Styles */
+.tasks-results {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.tasks-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.tasks-table th {
+    background: #f8f9fa;
+    color: #422253;
+    font-weight: 600;
+    padding: 16px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+    white-space: nowrap;
+}
+
+.tasks-table td {
+    padding: 12px;
+    border-bottom: 1px solid #f8f9fa;
+    vertical-align: top;
+}
+
+.task-row:hover {
+    background-color: #f8f9fa;
+}
+
+/* Highlight Styles */
+.highlight {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .search-results-container {
+        padding: 16px;
+    }
+
+    .result-header {
+        flex-direction: column;
+    }
+
+    .change-number {
+        margin-bottom: 8px;
+    }
+
+    .tasks-table {
+        font-size: 0.8rem;
+    }
+
+    .tasks-table th,
+    .tasks-table td {
+        padding: 8px 6px;
+    }
+}
+</style>
+{% endblock %}

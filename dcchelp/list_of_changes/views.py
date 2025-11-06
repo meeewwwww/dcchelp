@@ -8,8 +8,8 @@ from .forms import ChangeForm
 from .models import Change
 
 
-# Раздел листа изменений
 class ListOfChangesView(DataMixin, ListView):
+    """ Раздел листа изменений """
     template_name = 'list_of_changes/list_of_changes.html'
     context_object_name = 'changes'
     title = 'Лист изменений'
@@ -22,7 +22,10 @@ class ListOfChangesView(DataMixin, ListView):
         return Change.objects.all()
 
 
-# Реализована функция, т.к. используется AJAX (обновление данных на странице без обновления самой страницы)
+""" add_change, edit_change, cancel_change, delete_change реализованы как функции для AJAX 
+(обновление данных на странице без обновления самой страницы) """
+
+
 def add_change(request):
     if request.method == 'POST':
         form = ChangeForm(request.POST)
@@ -33,9 +36,10 @@ def add_change(request):
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
-# Реализована функция, т.к. используется AJAX (обновление данных на странице без обновления самой страницы)
 def edit_change(request, change_id):
+    """ Редактирование пункта листа изменений """
     change = get_object_or_404(Change, id=change_id)
+
     if request.method == 'POST':
         form = ChangeForm(request.POST, instance=change)
         if form.is_valid():
@@ -43,16 +47,17 @@ def edit_change(request, change_id):
             return JsonResponse({'success': True})
         return JsonResponse({'success': False, 'errors': form.errors})
 
-    return JsonResponse({
-        'number': change.number,
-        'title': change.title,
-        'text': change.text,
-        'link_approvement': change.link_approvement,
-    })
+    else:  # request.method == 'GET'
+        return JsonResponse({
+            'number': change.number,
+            'title': change.title,
+            'text': change.text,
+            'link_approvement': change.link_approvement,
+        })
 
 
-# Реализована функция, т.к. используется AJAX (обновление данных на странице без обновления самой страницы)
 def cancel_change(request, change_id):
+    """ Отмена пункта листа изменений """
     if request.method == 'POST':
         change = get_object_or_404(Change, id=change_id)
         change.active = 0
@@ -60,8 +65,8 @@ def cancel_change(request, change_id):
         return JsonResponse({'success': True})
 
 
-# Реализована функция, т.к. используется AJAX (обновление данных на странице без обновления самой страницы)
 def delete_change(request, change_id):
+    """ Удаление пункта листа изменений """
     if request.method == 'POST':
         change = get_object_or_404(Change, id=change_id)
         change.delete()

@@ -114,9 +114,6 @@ def edit_types(request):
         if 'type' in request.POST:
             type_data = {
                 'ru_name': request.POST.get('ru_name'),
-                'en_name': request.POST.get('en_name'),
-                'ru_short': request.POST.get('ru_short'),
-                'en_short': request.POST.get('en_short'),
                 'sub_types': request.POST.getlist('sub_types')  # Для ManyToMany field
             }
             form = DocumentTypesEditForm(type_data)
@@ -200,8 +197,8 @@ def edit_types(request):
 
 
 def get_types(request):
-    """Получить список всех типов"""
-    types = DocumentTypes.objects.all().values('id', 'ru_name', 'en_name', 'ru_short', 'en_short')
+    # Получить список всех типов
+    types = DocumentTypes.objects.all().values('id', 'ru_name')
     # Добавляем количество связанных подтипов
     for type_obj in types:
         type_obj['sub_types_count'] = DocumentTypes.objects.get(id=type_obj['id']).sub_types.count()
@@ -210,13 +207,13 @@ def get_types(request):
 
 
 def get_all_subtypes(request):
-    """Получить список всех подтипов"""
+    # Получить список всех подтипов
     subtypes = DocumentSubType.objects.all().values('id', 'name')
     return JsonResponse({'subtypes': list(subtypes)})
 
 
 def get_relations(request):
-    """Получить список всех связей между типами и подтипами"""
+    # Получить список всех связей между типами и подтипами
     relations = []
     types = DocumentTypes.objects.prefetch_related('sub_types').all()
 

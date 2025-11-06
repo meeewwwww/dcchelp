@@ -231,16 +231,16 @@
 .iteration-non-zero { background-color: #fae8d9; }
 
 /* Стили пользователей - применяем к span */
-.user-1 { font-weight: bold; color: #2563EB; }
+.user-1 { font-weight: bold; color: #1D4ED8; }
 .user-2 { font-weight: bold; color: #DC2626; }
-.user-3 { font-weight: bold; color: #059669; }
-.user-4 { font-weight: bold; color: #7C3AED; }
+.user-3 { font-weight: bold; color: #16A34A; }
+.user-4 { font-weight: bold; color: #9333EA; }
 .user-5 { font-weight: bold; color: #EA580C; }
 .user-6 { font-weight: bold; color: #DB2777; }
 .user-7 { font-weight: bold; color: #0369A1; }
-.user-8 { font-weight: bold; color: #0891B2; }
+.user-8 { font-weight: bold; color: #0D9488; }
 .user-9 { font-weight: bold; color: #65A30D; }
-.user-10 { font-weight: bold; color: #9333EA; }
+.user-10 { font-weight: bold; color: #A855F7; }
 .user-11 { font-weight: bold; color: #E11D48; }
 
 .user-display {

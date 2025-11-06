@@ -3,7 +3,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from dccpdh2.views import page_not_found
 
 
 urlpatterns = [
@@ -14,7 +13,7 @@ urlpatterns = [
     path('documentation/', include('documentation.urls')),
 ] + debug_toolbar_urls()
 
-handler404 = page_not_found
+handler404 = 'dccpdh2.views.page_not_found'
 admin.site.site_header = 'Панель администрирования'
 admin.site.index_title = 'DCC HELP PDH2'
 

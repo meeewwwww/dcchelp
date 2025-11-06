@@ -7,22 +7,10 @@
 
 <div class="page-container">
     <div class="categories-sidebar">
-        <div class="categories-header">
-            <a href="{% url 'documentation' %}" class="back-btn" style="
-                width: 100%;
-                display: inline-flex;
-                justify-content: center;
-                align-items: center;
-                padding: 12px 0;
-                background: linear-gradient(135deg, #904AB5 0%, #422253 100%);
-                color: white;
-                border-radius: 8px;
-                text-decoration: none;
-                font-weight: 600;
-                transition: all 0.3s ease;
-            ">
+        <div class="add-article-section">
+            <button class="add-article-btn" onclick="window.location.href='{% url 'documentation' %}'">
                 <span style="margin-right: 8px;">←</span> Вернуться в заметки
-            </a>
+            </button>
         </div>
 
         <div class="categories-tree">
@@ -61,23 +49,8 @@
                     <input type="hidden" name="type" value="true">
 
                     <div class="form-group">
-                        <label for="id_ru_name">Русское наименование</label>
+                        <label for="id_ru_name">Наименование</label>
                         {{ form_type.ru_name }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_en_name">Английское наименование</label>
-                        {{ form_type.en_name }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_ru_short">Короткое русское наименование</label>
-                        {{ form_type.ru_short }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_en_short">Короткое английское наименование</label>
-                        {{ form_type.en_short }}
                     </div>
 
                     <div class="form-group">
@@ -336,7 +309,7 @@
                     typesList.innerHTML = data.types.map(type => `
                         <div class="type-item" style="padding: 8px; margin-bottom: 5px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #5C2F74; display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <strong>${type.ru_name}</strong> (${type.en_name})
+                                <strong>${type.ru_name}</strong>
                                 <br><small>Подтипы: ${type.sub_types_count || 0}</small>
                             </div>
                             <button class="delete-btn" onclick="deleteType(${type.id})" title="Удалить тип">
@@ -459,7 +432,7 @@
     }
 
     function deleteType(typeId) {
-        if (!confirm('Удалить этот тип? Это также удалит все связанные подтипы и заметки о документации.')) return;
+        if (!confirm('Удалить этот тип? Это также удалит все связи с подтипами и заметки о документации.')) return;
 
         const formData = new FormData();
         formData.append('delete_type', 'true');
@@ -577,11 +550,6 @@
         scroll-margin-top: 20px;
     }
 
-    .delete-btn:hover {
-        background: #f8d7da !important;
-        border-radius: 3px;
-    }
-
     #floatingTopBtn:hover {
         transform: translateY(-3px);
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
@@ -597,12 +565,6 @@
             height: 45px;
             font-size: 18px;
         }
-    }
-
-    #id_en_name + label::after,
-    #id_ru_short + label::after,
-    #id_en_short + label::after {
-    display: none !important;
     }
 </style>
 
@@ -625,7 +587,9 @@
     transition: all 0.3s ease;
     z-index: 1000;
 " onclick="scrollToTop()" title="Вернуться наверх">
-    ↑
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-bar-up" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M8 10a.5.5 0 0 0 .5-.5V3.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 3.707V9.5a.5.5 0 0 0 .5.5m-7 2.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5"/>
+    </svg>
 </div>
 
 {% endblock %}

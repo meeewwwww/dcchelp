@@ -1,9 +1,4 @@
-from collections import defaultdict
-from datetime import timedelta
-
-from django.http import HttpResponseServerError
 from django.shortcuts import render
-from django.utils import timezone
 from django.views.generic import ListView, TemplateView
 
 from .models import FAQ
@@ -13,37 +8,18 @@ from tasks.models import Task
 from documentation.models import DocumentArticle
 
 
-# Главная страница.
 class IndexView(DataMixin, TemplateView):
+    """ Отображение главной страницы сайта """
     template_name = 'index.html'
     title = 'Главная страница'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Для дашборда со статусом задач
-        tasks = Task.objects.filter(status__in=['not_taken', 'in_progress', 'on_hold'])
+        tasks = Task.active_tasks.all()
 
         # Для дашборда с графиком задач
-        end_date = timezone.now().date()
-        start_date = end_date - timedelta(days=29)
-        all_tasks = Task.objects.all()
-
-        # Группируем задачи по дате создания
-        tasks_by_date = defaultdict(int)
-        for task in all_tasks:
-            date_created = task.created.date()
-            if date_created >= start_date:
-                tasks_by_date[date_created] += 1
-
-        # Заполняем все даты за последние 30 дней
-        chart_data = []
-        current_date = start_date
-        while current_date <= end_date:
-            chart_data.append({
-                'date': current_date.strftime('%d.%m'),
-                'count': tasks_by_date.get(current_date, 0)
-            })
-            current_date += timedelta(days=1)
+        chart_data = Task.active_tasks_chart_72h.all()
 
         return self.get_mixin_context(context,
                                       changes=Change.objects.all()[:6],
@@ -70,27 +46,33 @@ class FAQView(DataMixin, ListView):
         return self.get_mixin_context(context)
 
     def get_queryset(self):
-        return FAQ.objects.filter(answered=True)
+        return FAQ.objects.all()
+
+
+def page_not_found(request, exception):
+    """ Кастомная страница ошибки 404 """
+    return render(request, '404.html', {
+        'title': 'Страница не найдена',
+        'menu': DataMixin.menu
+    }, status=404)
 
 
 # Разобраться и реализовать поиск по сайту
 def search(request):
     query = request.GET.get('q', '')
-    results = []
+    changes = []
+    tasks = []
+    articles = []
 
     if query:
-        results = YourModel.objects.filter(
-            Q(title__icontains=query) |
-            Q(content__icontains=query)
-        )
+        changes = Change.search.search(query) # Поиск по полям 'title', 'text'
+        tasks = Task.search.search(query)  # Поиск по полям 'number', 'name', 'result', 'comment'
+        articles = DocumentArticle.search.search(query)  # Поиск по полям 'title', 'text'
 
-    return render(request, 'search_results.html', {
-        'results': results,
-        'query': query
+    return render(request, 'search.html', {
+        'changes': changes,
+        'tasks': tasks,
+        'query': query,
+        'articles': articles,
+        'menu': DataMixin.menu,
     })
-
-
-# Разработать какую-то крутецкую 404
-def page_not_found(request, exception):
-    text = '''Woops! Страница не найдена.'''
-    return HttpResponseServerError(text)

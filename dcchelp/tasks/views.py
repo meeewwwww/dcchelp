@@ -35,7 +35,7 @@ class TasksView(DataMixin, ListView):
         tasks = Task.objects.filter(
             Q(created__gte=time_threshold) |
             Q(status__in=['not_taken', 'in_progress', 'on_hold'])
-        ).order_by('-created')
+        )
         return tasks
 
 
@@ -91,7 +91,6 @@ def update_task(request, task_id):
             task.result = request.POST.get('result')
             task.comment = request.POST.get('comment')
 
-            print("Received data:", dict(request.POST))
             task.save()
             return JsonResponse({'success': True})
         except Exception as e:

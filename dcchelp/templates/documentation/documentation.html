@@ -211,17 +211,20 @@ function loadArticleForm() {
             const form = document.getElementById('addArticleForm');
             if (form) {
                 form.addEventListener('submit', function(e) {
-                    // ВАЛИДАЦИЯ ТОЛЬКО РЕДАКТОРА
+                    e.preventDefault(); // ВАЖНО: предотвращаем стандартную отправку формы
+
+                    // ВАЛИДАЦИЯ РЕДАКТОРА
                     if (window.articleEditor) {
                         const textarea = document.getElementById('id_text');
                         textarea.value = window.articleEditor.getData();
 
                         if (!validateEditor(window.articleEditor)) {
-                            e.preventDefault();
                             return;
                         }
                     }
-                    // Для остальных полей работает стандартная браузерная валидация
+
+                    // Вызываем нашу функцию сохранения
+                    saveArticle();
                 });
             }
         })
@@ -351,23 +354,22 @@ function editArticle(articleId) {
     // Проверяем, не открыта ли уже форма редактирования
     const existingEditForm = articleItem.querySelector('.article-edit-form');
     if (existingEditForm) {
-        // Если форма уже открыта - закрываем её (как отмена)
         cancelEdit(articleId);
         return;
     }
 
     const articleTitle = articleItem.querySelector('.article-main');
     const articleText = articleItem.querySelector('.article-text');
-    const currentTitle = articleTitle.textContent;
+    const currentTitle = articleTitle.textContent.trim();
     const currentContent = articleText.innerHTML;
 
-    // Создаем форму редактирования с теми же классами что и форма добавления
+    // Создаем форму редактирования
     const editForm = document.createElement('div');
     editForm.className = 'article-edit-form';
     editForm.innerHTML = `
         <div class="form-group">
             <label>Заголовок:</label>
-            <input type="text" id="edit-title-${articleId}" value="${currentTitle}" class="form-control">
+            <input type="text" id="edit-title-${articleId}" value="${currentTitle.replace(/"/g, '&quot;')}" class="form-control">
         </div>
         <div class="form-group">
             <label>Содержание:</label>
@@ -389,36 +391,88 @@ function editArticle(articleId) {
     initializeArticleEditor(articleId);
 }
 
-// Сохранение статьи
-function saveArticle(articleId) {
-    const editor = window[`articleEditor_${articleId}`];
-    if (!editor) {
-        alert('Редактор не загружен');
-        return;
+// Универсальная функция
+function saveArticle(articleId = null) {
+    let formData = new FormData();
+    const csrfToken = getCSRFToken();
+
+    // Определяем URL
+    let url;
+    if (articleId) {
+        // Редактирование существующей статьи
+        url = `/documentation/article/${articleId}/edit/`;
+
+        // Получаем данные из формы редактирования
+        const titleInput = document.getElementById(`edit-title-${articleId}`);
+        const editor = window[`articleEditor_${articleId}`];
+
+        if (!titleInput || !editor) {
+            alert('Ошибка: не найдены данные для сохранения');
+            return;
+        }
+
+        const title = titleInput.value.trim();
+        const content = editor.getData();
+
+        if (!title) {
+            titleInput.focus();
+            return;
+        }
+
+        if (!content.trim()) {
+            editor.editing.view.focus();
+            return;
+        }
+
+        formData.append('title', title);
+        formData.append('text', content);
+
+    } else {
+        // Создание новой статьи
+        url = '/documentation/add-article/';
+
+        // Получаем данные из основной формы
+        const form = document.getElementById('addArticleForm');
+        if (!form) {
+            alert('Форма не найдена');
+            return;
+        }
+
+        // Собираем данные из формы
+        const docType = document.getElementById('id_doc_type')?.value;
+        const docSubType = document.getElementById('id_doc_sub_type')?.value;
+        const title = document.getElementById('id_title')?.value;
+        const editor = window.articleEditor;
+
+        if (!docType) {
+            alert('Выберите тип документа');
+            document.getElementById('id_doc_type').focus();
+            return;
+        }
+
+        if (!title) {
+            alert('Введите заголовок статьи');
+            document.getElementById('id_title').focus();
+            return;
+        }
+
+        if (!editor || !editor.getData().trim()) {
+            alert('Введите содержание статьи');
+            if (editor) editor.editing.view.focus();
+            return;
+        }
+
+        formData.append('doc_type', docType);
+        if (docSubType) formData.append('doc_sub_type', docSubType);
+        formData.append('title', title);
+        formData.append('text', editor.getData());
     }
 
-    const titleInput = document.getElementById(`edit-title-${articleId}`);
-    const title = titleInput?.value.trim() || '';
+    // Добавляем CSRF токен
+    formData.append('csrfmiddlewaretoken', csrfToken);
 
-    // ВАЛИДАЦИЯ ТОЛЬКО РЕДАКТОРА
-    if (!validateEditor(editor)) {  // ← передаем правильный редактор
-        return;
-    }
-
-    // Если заголовок пустой - простая проверка
-    if (!title) {
-        titleInput.focus();
-        return;
-    }
-
-    const content = editor.getData();
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('text', content);
-
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-
-    fetch(`/documentation/article/${articleId}/edit/`, {
+    // Отправляем запрос
+    fetch(url, {
         method: 'POST',
         body: formData,
         headers: {
@@ -429,29 +483,16 @@ function saveArticle(articleId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Обновляем статью
-            const articleItem = document.querySelector(`.article-item[data-article-id="${articleId}"]`);
-            const articleTitle = articleItem.querySelector('.article-main');
-            const articleText = articleItem.querySelector('.article-text');
-            const editForm = articleItem.querySelector('.article-edit-form');
-
-            articleTitle.textContent = title;
-            articleText.innerHTML = content;
-            editForm.remove();
-            articleTitle.style.display = articleText.style.display = 'block';
-
-            // Обновляем дату
-            const updatedSpan = articleItem.querySelector('.article-meta span:nth-child(2)');
-            if (updatedSpan) {
-                updatedSpan.textContent = `Обновлено: ${new Date().toLocaleString()}`;
+            if (articleId) {
+                // После редактирования перезагружаем контент
+                location.reload();
+            } else {
+                // После создания перезагружаем страницу
+                window.location.href = '/documentation/';
             }
-
-            // Уничтожаем редактор
-            editor.destroy().then(() => {
-                delete window[`articleEditor_${articleId}`];
-            });
         } else {
-            alert('Ошибка: ' + JSON.stringify(data.errors));
+            console.error('Ошибки:', data.errors);
+            alert('Ошибка сохранения: ' + JSON.stringify(data.errors));
         }
     })
     .catch(error => {
@@ -459,7 +500,6 @@ function saveArticle(articleId) {
         alert('Произошла ошибка при сохранении');
     });
 }
-
 
 // Также вызываем при открытии форм
 function openArticleForm() {
