@@ -67,7 +67,7 @@ def search(request):
     if query:
         changes = Change.search.search(query) # Поиск по полям 'title', 'text'
         tasks = Task.search.search(query)  # Поиск по полям 'number', 'name', 'result', 'comment'
-        articles = DocumentArticle.search.search(query)  # Поиск по полям 'title', 'text'
+        articles = DocumentArticle.search.search(query)  # Поиск по полям 'title', 'clean_text'
 
     return render(request, 'search.html', {
         'changes': changes,

@@ -55,7 +55,7 @@
 .content {
     margin-top: 0px;
     padding: 0px;
-    flex: 1; /* ← ДОБАВИТЬ */
+    flex: 1;
     display: flex;
     flex-direction: column;
 }
@@ -97,10 +97,11 @@ body {
     height: 35px;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
 }
 
 .search-form {
-    width: 100%;
+    width: auto;
     margin: 0;
     padding: 0 20px;
     display: flex;
@@ -114,6 +115,7 @@ body {
     border-radius: 3px;
     font-size: 13px;
     background: white;
+    flex-shrink: 0;
 }
 
 .search-btn {
@@ -130,6 +132,27 @@ body {
 
 .search-btn:hover {
     background: #5A2D72; /* Более темный оттенок при наведении */
+}
+
+.page-container ~ .search-bar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: #f8f9fa;
+}
+
+.page-container ~ .search-bar .search-form {
+    width: auto;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.page-container ~ .search-bar .search-input {
+    width: 200px;
+    flex-shrink: 0;
 }
 
 /* Стили главной страницы */

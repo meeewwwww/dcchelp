@@ -57,7 +57,7 @@
                             </span>
                         </div>
                         <div class="result-text">
-                            {% with text=article.text|html_to_text %}
+                            {% with text=article.clean_text %}
                                 {{ text|truncatechars:150|highlight_search:query }}
                             {% endwith %}
                         </div>
@@ -287,7 +287,7 @@
 .highlight {
     background-color: #fff3cd;
     color: #856404;
-    padding: 2px 4px;
+    padding: 2px 0;
     border-radius: 3px;
     font-weight: 600;
 }

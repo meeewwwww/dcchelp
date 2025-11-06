@@ -1,3 +1,4 @@
+from bs4 import BeautifulSoup
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
 
@@ -8,7 +9,7 @@ class SearchManager(models.Manager):
         if not query:
             return self.none()
 
-        results = self.filter(models.Q(title__iregex=query) | models.Q(text__iregex=query))
+        results = self.filter(models.Q(title__iregex=query) | models.Q(clean_text__iregex=query))
         return results
 
 
@@ -17,6 +18,7 @@ class DocumentArticle(models.Model):
     CKeditor для поля text используется без подписки - с ограниченным функционалом """
     title = models.CharField(max_length=255)
     text = CKEditor5Field('Text', config_name='extends')
+    clean_text = models.TextField(blank=True)
     doc_type = models.ForeignKey('DocumentTypes', on_delete=models.CASCADE, related_name='articles')
     doc_sub_type = models.ForeignKey('DocumentSubType', on_delete=models.CASCADE, related_name='articles')
     created = models.DateTimeField(auto_now_add=True)
@@ -31,6 +33,19 @@ class DocumentArticle(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        # Автоматически генерируем clean_text при сохранении
+        if self.text:
+            self.clean_text = self.html_to_text(self.text)
+        super().save(*args, **kwargs)
+
+    @staticmethod
+    def html_to_text(html_content):
+        if not html_content:
+            return ""
+        soup = BeautifulSoup(html_content, 'html.parser')
+        return soup.get_text(strip=True)
 
     @staticmethod
     def get_absolute_url():
