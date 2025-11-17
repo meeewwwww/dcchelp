@@ -1,0 +1,580 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/archive_statistics.css' %}">
+
+<!-- ПОДКЛЮЧАЕМ CHART.JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="archive-statistics-container">
+    <!-- Раздел 1: Отобразить статистику за период -->
+    <div class="archive-statistics-section">
+        <h2 class="archive-statistics-section-title">Отобразить статистику за период</h2>
+        <form id="statistics-form" class="archive-statistics-filter-form">
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Начальная дата</label>
+                <input type="date" class="archive-statistics-form-control" id="start-date" name="start_date">
+            </div>
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Конечная дата</label>
+                <input type="date" class="archive-statistics-form-control" id="end-date" name="end_date">
+            </div>
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Пользователь</label>
+                <select name="user" class="archive-statistics-form-control" id="user-select">
+                    <option value="">Не выбрано</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.get_full_name|default:user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="archive-statistics-btn archive-statistics-btn-primary">Отобразить</button>
+        </form>
+
+        <!-- Контейнер для графика - изначально скрыт -->
+        <div id="chart-container" class="archive-statistics-chart-container" style="display: none;">
+            <canvas id="statistics-chart"></canvas>
+        </div>
+
+        <!-- Сообщение о необходимости выбрать фильтры -->
+        <div id="chart-placeholder" class="archive-statistics-no-results">
+            <p>Выберите параметры фильтрации и нажмите "Отобразить" для просмотра статистики</p>
+        </div>
+    </div>
+
+    <!-- Остальные разделы без изменений -->
+    <div class="archive-statistics-section">
+        <h2 class="archive-statistics-section-title">Экспортировать данные в Excel</h2>
+        <form id="export-form" class="archive-statistics-filter-form">
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Начальная дата</label>
+                <input type="date" class="archive-statistics-form-control" name="start_date">
+            </div>
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Конечная дата</label>
+                <input type="date" class="archive-statistics-form-control" name="end_date">
+            </div>
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">&nbsp;</label>
+                <button type="submit" class="archive-statistics-btn archive-statistics-btn-success">Экспортировать в формате .xlsx</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="archive-statistics-section">
+        <h2 class="archive-statistics-section-title">Изменить архивные данные</h2>
+        <form id="search-form" class="archive-statistics-filter-form">
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Номер задачи</label>
+                <input type="text" class="archive-statistics-form-control" name="number" placeholder="Введите номер задачи">
+            </div>
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Название задачи</label>
+                <input type="text" class="archive-statistics-form-control" name="name" placeholder="Введите название задачи">
+            </div>
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">&nbsp;</label>
+                <button type="submit" class="archive-statistics-btn archive-statistics-btn-primary">Найти</button>
+            </div>
+        </form>
+
+        <div id="search-results" class="archive-statistics-search-results">
+            <!-- Результаты поиска будут отображаться здесь -->
+        </div>
+    </div>
+</div>
+
+
+<!-- Модальное окно для редактирования задачи -->
+<div id="edit-modal" class="archive-statistics-edit-modal archive-statistics-hidden">
+    <div class="archive-statistics-modal-content">
+        <div class="archive-statistics-modal-header">
+            <h3 class="archive-statistics-modal-title">Редактирование задачи</h3>
+            <button class="archive-statistics-close-btn" onclick="closeEditModal()">&times;</button>
+        </div>
+        <div id="edit-message"></div>
+        <form id="edit-form" class="archive-statistics-edit-form">
+            <input type="hidden" id="edit-task-id" name="task_id">
+
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Номер</label>
+                <input type="text" class="archive-statistics-form-control" id="edit-number" name="number" required>
+            </div>
+
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Дата создания</label>
+                <input type="text" class="archive-statistics-form-control" id="edit-created" name="created" placeholder="ДД.ММ.ГГГГ ЧЧ:ММ" required>
+            </div>
+
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Название</label>
+                <input type="text" class="archive-statistics-form-control" id="edit-name" name="name" required>
+            </div>
+
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Тип</label>
+                <input type="text" class="archive-statistics-form-control" id="edit-type" name="type">
+            </div>
+
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Приоритет</label>
+                <select class="archive-statistics-form-control" id="edit-priority" name="priority">
+                    <option value="false">Нет</option>
+                    <option value="true">Да</option>
+                </select>
+            </div>
+
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Итерация</label>
+                <input type="number" class="archive-statistics-form-control" id="edit-iteration" name="iteration" value="1">
+            </div>
+
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Статус</label>
+                <input type="text" class="archive-statistics-form-control" id="edit-status" name="status">
+            </div>
+
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Дата завершения</label>
+                <input type="date" class="archive-statistics-form-control" id="edit-finished" name="finished">
+            </div>
+
+            <div class="archive-statistics-form-group">
+                <label class="archive-statistics-form-label">Пользователь</label>
+                <select class="archive-statistics-form-control" id="edit-user" name="user">
+                    <option value="">Не выбрано</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.get_full_name|default:user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="archive-statistics-form-group archive-statistics-full-width">
+                <label class="archive-statistics-form-label">Результат</label>
+                <textarea class="archive-statistics-form-control" id="edit-result" name="result" rows="3"></textarea>
+            </div>
+
+            <div class="archive-statistics-form-group archive-statistics-full-width">
+                <label class="archive-statistics-form-label">Комментарий</label>
+                <textarea class="archive-statistics-form-control" id="edit-comment" name="comment" rows="3"></textarea>
+            </div>
+
+            <div class="archive-statistics-form-actions">
+                <button type="button" class="archive-statistics-btn archive-statistics-btn-cancel" onclick="closeEditModal()">Отмена</button>
+                <button type="submit" class="archive-statistics-btn archive-statistics-btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Функция для проверки загрузки Chart.js
+function checkChartJS() {
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js не загружен!');
+        return false;
+    }
+    return true;
+}
+
+
+    // Основная функция для создания графика
+function createChart(chartData, chartType = 'bar', dataType = 'users') {
+    // Проверяем загружен ли Chart.js
+    if (!checkChartJS()) {
+        alert('Библиотека графиков не загружена. Пожалуйста, обновите страницу.');
+        return;
+    }
+
+    const ctx = document.getElementById('statistics-chart').getContext('2d');
+
+    // Уничтожаем предыдущий график если существует
+    if (window.statisticsChart) {
+        window.statisticsChart.destroy();
+    }
+
+    const labels = chartData.labels;
+    const counts = chartData.data;
+
+    // Определяем заголовок в зависимости от типа данных
+    let chartLabel = '';
+    let xAxisTitle = '';
+
+    if (dataType === 'user') {
+        chartLabel = 'Количество задач по датам';
+        xAxisTitle = 'Даты';
+    } else {
+        chartLabel = 'Количество задач по пользователям';
+        xAxisTitle = 'Пользователи';
+    }
+
+    window.statisticsChart = new Chart(ctx, {
+        type: chartType,
+        data: {
+            labels: labels,
+            datasets: [{
+                label: chartLabel,
+                data: counts,
+                borderColor: '#422253',
+                backgroundColor: dataType === 'user' ? 'rgba(66, 34, 83, 0.7)' : 'rgba(106, 90, 205, 0.7)',
+                borderWidth: 2,
+                borderRadius: 4,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14,
+                            family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                        },
+                        color: '#422253'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(66, 34, 83, 0.9)',
+                    titleFont: { size: 13 },
+                    bodyFont: { size: 13 },
+                    padding: 10,
+                    cornerRadius: 8
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                    ticks: {
+                        font: { size: 12 },
+                        color: '#6c757d',
+                        precision: 0
+                    },
+                    title: {
+                        display: true,
+                        text: 'Количество задач',
+                        font: { size: 13, weight: 'bold' },
+                        color: '#422253'
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        font: { size: 11 },
+                        color: '#6c757d',
+                        maxRotation: dataType === 'user' ? 0 : 45,
+                        minRotation: dataType === 'user' ? 0 : 45
+                    },
+                    title: {
+                        display: true,
+                        text: xAxisTitle,
+                        font: { size: 13, weight: 'bold' },
+                        color: '#422253'
+                    }
+                }
+            },
+            interaction: { intersect: false, mode: 'index' },
+            animations: { duration: 1000, easing: 'easeOutQuart' }
+        }
+    });
+
+    // Показываем контейнер с графиком
+    document.getElementById('chart-container').style.display = 'block';
+    document.getElementById('chart-placeholder').style.display = 'none';
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Убедимся, что модальное окно скрыто
+    const editModal = document.getElementById('edit-modal');
+    if (editModal) {
+        editModal.classList.add('archive-statistics-hidden');
+    }
+
+    // Скрываем контейнер графика при загрузке
+    document.getElementById('chart-container').style.display = 'none';
+    document.getElementById('chart-placeholder').style.display = 'block';
+});
+
+// Обработчик формы статистики
+document.getElementById('statistics-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Проверяем загружен ли Chart.js
+    if (!checkChartJS()) {
+        alert('Библиотека графиков не загружена. Пожалуйста, обновите страницу.');
+        return;
+    }
+
+    const formData = new FormData(this);
+    const params = new URLSearchParams();
+
+    for (let [key, value] of formData.entries()) {
+        if (value) params.append(key, value);
+    }
+
+    // Показываем загрузку
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalText = submitButton.textContent;
+    submitButton.textContent = 'Загрузка...';
+    submitButton.disabled = true;
+
+    fetch(`/tasks/archive/get-statistics/?${params}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Ошибка: ' + data.error);
+                return;
+            }
+
+            // Создаем график с учетом типа данных
+            createChart(data, 'bar', data.type);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при загрузке статистики');
+        })
+        .finally(() => {
+            // Восстанавливаем кнопку
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+        });
+});
+
+    // Убедимся, что модальное окно скрыто при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        const editModal = document.getElementById('edit-modal');
+        if (editModal) {
+            editModal.classList.add('archive-statistics-hidden');
+        }
+    });
+
+    // Статистика
+    document.getElementById('statistics-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const params = new URLSearchParams();
+
+        for (let [key, value] of formData.entries()) {
+            if (value) params.append(key, value);
+        }
+
+        fetch(`/tasks/archive/get-statistics/?${params}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Ошибка: ' + data.error);
+                    return;
+                }
+
+                const ctx = document.getElementById('statistics-chart').getContext('2d');
+
+                // Уничтожаем предыдущий график если существует
+                if (window.statisticsChart) {
+                    window.statisticsChart.destroy();
+                }
+
+                window.statisticsChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: data.type === 'user' ? 'Количество выполненных задач' : 'Количество задач по пользователям',
+                            data: data.data,
+                            backgroundColor: '#6C3483',
+                            borderColor: '#5A2D72',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Количество задач'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: data.type === 'user' ? 'Дата' : 'Пользователь'
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка при загрузке статистики');
+            });
+    });
+
+    // Экспорт в Excel
+    document.getElementById('export-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const params = new URLSearchParams();
+
+        for (let [key, value] of formData.entries()) {
+            if (value) params.append(key, value);
+        }
+
+        // Просто перенаправляем на URL экспорта
+        window.location.href = `/tasks/archive/export-excel/?${params}`;
+    });
+
+    // Поиск задач для редактирования
+    document.getElementById('search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const params = new URLSearchParams();
+
+        for (let [key, value] of formData.entries()) {
+            if (value) params.append(key, value);
+        }
+
+        fetch(`/tasks/archive/search-tasks/?${params}`)
+            .then(response => response.json())
+            .then(data => {
+                const resultsContainer = document.getElementById('search-results');
+
+                if (data.tasks.length === 0) {
+                    resultsContainer.innerHTML = '<div class="archive-statistics-no-results">Задачи не найдены</div>';
+                    return;
+                }
+
+                let html = '<table class="archive-statistics-tasks-table"><thead><tr>';
+                html += '<th>Номер</th><th>Создана</th><th>Название</th><th>Тип</th><th>Приоритет</th><th>Статус</th><th>Действия</th>';
+                html += '</tr></thead><tbody>';
+
+                data.tasks.forEach(task => {
+                    html += `<tr>
+                        <td>${task.number || ''}</td>
+                        <td>${task.created || ''}</td>
+                        <td>${task.name || ''}</td>
+                        <td>${task.type || ''}</td>
+                        <td>${task.priority ? 'Да' : 'Нет'}</td>
+                        <td>${task.status || ''}</td>
+                        <td><button class="archive-statistics-btn archive-statistics-btn-primary" onclick="showEditForm(${task.id})">Редактировать</button></td>
+                    </tr>`;
+                });
+
+                html += '</tbody></table>';
+                resultsContainer.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка при поиске задач');
+            });
+    });
+
+    // Функции для работы с модальным окном редактирования
+    function showEditForm(taskId) {
+        // Загружаем данные задачи
+        fetch(`/tasks/archive/search-tasks/?number=&name=`)
+            .then(response => response.json())
+            .then(data => {
+                const task = data.tasks.find(t => t.id === taskId);
+                if (task) {
+                    // Заполняем форму данными задачи
+                    document.getElementById('edit-task-id').value = task.id;
+                    document.getElementById('edit-number').value = task.number || '';
+                    document.getElementById('edit-created').value = task.created || '';
+                    document.getElementById('edit-name').value = task.name || '';
+                    document.getElementById('edit-type').value = task.type || '';
+                    document.getElementById('edit-priority').value = task.priority ? 'true' : 'false';
+                    document.getElementById('edit-iteration').value = task.iteration || 1;
+                    document.getElementById('edit-status').value = task.status || '';
+                    document.getElementById('edit-finished').value = task.finished || '';
+                    document.getElementById('edit-user').value = task.user_id || '';
+                    document.getElementById('edit-result').value = task.result || '';
+                    document.getElementById('edit-comment').value = task.comment || '';
+
+                    // Показываем модальное окно
+                    document.getElementById('edit-modal').classList.remove('archive-statistics-hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ошибка при загрузке данных задачи');
+            });
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').classList.add('archive-statistics-hidden');
+        document.getElementById('edit-message').innerHTML = '';
+    }
+
+    // Обработка формы редактирования
+    document.getElementById('edit-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const taskId = document.getElementById('edit-task-id').value;
+        const formData = new FormData(this);
+
+        fetch(`/tasks/archive/update-task/${taskId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCSRFToken()
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const messageDiv = document.getElementById('edit-message');
+            if (data.success) {
+                messageDiv.innerHTML = '<div class="archive-statistics-message archive-statistics-message-success">Данные успешно обновлены!</div>';
+                // Закрываем модальное окно через 2 секунды
+                setTimeout(() => {
+                    closeEditModal();
+                    // Обновляем результаты поиска
+                    document.getElementById('search-form').dispatchEvent(new Event('submit'));
+                }, 2000);
+            } else {
+                messageDiv.innerHTML = `<div class="archive-statistics-message archive-statistics-message-error">Ошибка: ${data.error}</div>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('edit-message').innerHTML = '<div class="archive-statistics-message archive-statistics-message-error">Произошла ошибка при сохранении</div>';
+        });
+    });
+
+    // Функция для получения CSRF токена
+    function getCSRFToken() {
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Закрытие модального окна при клике вне его
+    document.getElementById('edit-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeEditModal();
+        }
+    });
+</script>
+
+{% endblock %}

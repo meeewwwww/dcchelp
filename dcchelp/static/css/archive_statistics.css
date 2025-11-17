@@ -1,0 +1,242 @@
+/* Стили для страницы архивной статистики */
+.archive-statistics-container {
+    max-width: 1500px;
+    margin: 100px auto 50px;
+    padding: 0 20px;
+}
+
+.archive-statistics-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    margin-bottom: 30px;
+    padding: 25px;
+}
+
+.archive-statistics-section-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #422253;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.archive-statistics-filter-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 15px;
+    align-items: end;
+}
+
+.archive-statistics-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.archive-statistics-form-label {
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #555;
+}
+
+.archive-statistics-form-control {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.archive-statistics-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.archive-statistics-btn-primary {
+    background: #6C3483;
+    color: white;
+}
+
+.archive-statistics-btn-primary:hover {
+    background: #5A2D72;
+}
+
+.archive-statistics-btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.archive-statistics-btn-success:hover {
+    background: #218838;
+}
+
+.archive-statistics-chart-container {
+    height: 400px;
+    margin-top: 20px;
+}
+
+.archive-statistics-tasks-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.archive-statistics-tasks-table th,
+.archive-statistics-tasks-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.archive-statistics-tasks-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.archive-statistics-edit-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.archive-statistics-full-width {
+    grid-column: 1 / -1;
+}
+
+/* ИСПРАВЛЕННЫЙ СТИЛЬ - важно! */
+.archive-statistics-hidden {
+    display: none !important;
+}
+
+.archive-statistics-loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.archive-statistics-search-results {
+    margin-top: 20px;
+}
+
+.archive-statistics-no-results {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Стили для модального окна */
+.archive-statistics-edit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.archive-statistics-modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.archive-statistics-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.archive-statistics-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #422253;
+    margin: 0;
+}
+
+.archive-statistics-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.archive-statistics-close-btn:hover {
+    color: #333;
+    background: #f8f9fa;
+    border-radius: 50%;
+}
+
+.archive-statistics-form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.archive-statistics-btn-cancel {
+    background: #6c757d;
+    color: white;
+}
+
+.archive-statistics-btn-cancel:hover {
+    background: #5a6268;
+}
+
+.archive-statistics-message {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.archive-statistics-message-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.archive-statistics-message-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+#chart-placeholder {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-style: italic;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.archive-statistics-chart-container {
+    transition: all 0.3s ease;
+}

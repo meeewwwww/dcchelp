@@ -1,18 +1,16 @@
-
 from datetime import timedelta, datetime
-import json
 
+import pandas as pd
 from django.contrib.auth import get_user_model
-from django.db.models import Q
-from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.db.models import Q, Count
+from django.http import JsonResponse, HttpResponse
 from dccpdh2.utils import DataMixin
+from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView
 
 from tasks.models import Task
-
 from tasks.forms import TaskFrom
 
 
@@ -105,3 +103,196 @@ def delete_task(request, task_id):
             return JsonResponse({'success': True})
         except Task.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Task not found'})
+
+
+def archive_statistics(request):
+    users = get_user_model().objects.filter(is_superuser=False).order_by('first_name')
+
+    # Получаем данные для статистики (последние 30 дней)
+    from datetime import datetime, timedelta
+    from django.db.models import Count
+
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=30)
+
+    # Статистика по задачам за период
+    chart_data = Task.objects.filter(
+        created__range=[start_date, end_date]
+    ).extra(
+        {'date_created': "date(created)"}
+    ).values('date_created').annotate(
+        count=Count('id')
+    ).order_by('date_created')
+
+    # Форматируем данные для графика
+    formatted_chart_data = []
+    for item in chart_data:
+        formatted_chart_data.append({
+            'date': item['date_created'],
+            'full_date': item['date_created'],
+            'count': item['count']
+        })
+
+    context = {
+        'users': users,
+        'all_tasks': Task.objects.all().order_by('-created')[:100],
+        'chart_data': formatted_chart_data,
+        'menu': DataMixin.menu,
+    }
+    return render(request, 'tasks/archive_statistics.html', context)
+
+
+def get_statistics_data(request):
+    if request.method == 'GET':
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        user_id = request.GET.get('user_id')
+
+        tasks = Task.objects.all()
+
+        # Фильтрация по дате
+        if start_date and end_date:
+            start_date = datetime.fromisoformat(start_date)
+            end_date = datetime.fromisoformat(end_date)
+            tasks = tasks.filter(Q(created__gte=start_date) & Q(created__lte=end_date))
+        elif start_date:
+            start_date = datetime.fromisoformat(start_date)
+            tasks = tasks.filter(created__gte=start_date)
+        elif end_date:
+            end_date = datetime.fromisoformat(end_date)
+            tasks = tasks.filter(created__lte=end_date)
+
+        # Фильтрация по пользователю
+        if user_id:
+            tasks = tasks.filter(user_id=user_id)
+
+        if user_id:
+            # Статистика для конкретного пользователя - по датам
+            date_stats = tasks.extra(
+                {'date_created': "date(created)"}
+            ).values('date_created').annotate(
+                count=Count('id')
+            ).order_by('date_created')
+
+            data = {
+                'labels': [item['date_created'].strftime('%d.%m.%Y') for item in date_stats],
+                'data': [item['count'] for item in date_stats],
+                'type': 'user'
+            }
+        else:
+            # Статистика по всем пользователям - по пользователям
+            user_stats = tasks.values(
+                'user__first_name', 'user__last_name', 'user_id'
+            ).annotate(
+                count=Count('id')
+            ).order_by('-count')
+
+            data = {
+                'labels': [
+                    f"{item['user__first_name'] or ''} {item['user__last_name'] or ''}".strip()
+                    if item['user__first_name'] or item['user__last_name']
+                    else f"User #{item['user_id']}"
+                    for item in user_stats
+                ],
+                'data': [item['count'] for item in user_stats],
+                'type': 'users'
+            }
+
+        return JsonResponse(data)
+
+    return JsonResponse({'error': 'Invalid request method'})
+
+
+def export_to_excel(request):
+    if request.method == 'GET':
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+
+        tasks = Task.objects.all()
+
+        # Фильтрация по дате
+        if start_date:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+            tasks = tasks.filter(created__gte=start_date)
+        if end_date:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+            tasks = tasks.filter(created__lte=end_date)
+
+        # Создание DataFrame
+        data = []
+        for task in tasks:
+            data.append({
+                'Number': task.number,
+                'Created': task.created.strftime('%d.%m.%Y %H:%M') if task.created else '',
+                'Name': task.name,
+                'Type': task.type,
+                'Priority': 'Да' if task.priority else 'Нет',
+                'Iteration': task.iteration,
+                'Status': task.status,
+                'Finished': task.finished.strftime('%d.%m.%Y') if task.finished else '',
+                'User': f"{task.user.first_name} {task.user.last_name}" if task.user else '',
+                'Result': task.result,
+                'Comment': task.comment
+            })
+
+        df = pd.DataFrame(data)
+
+        # Создание HTTP ответа с Excel файлом
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="archive_data.xlsx"'
+
+        with pd.ExcelWriter(response, engine='openpyxl') as writer:
+            df.to_excel(writer, sheet_name='Archive Data', index=False)
+
+            # Автонастройка ширины колонок
+            worksheet = writer.sheets['Archive Data']
+            for column in worksheet.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = min(max_length + 2, 50)
+                worksheet.column_dimensions[column_letter].width = adjusted_width
+
+        return response
+
+    return JsonResponse({'error': 'Invalid request method'})
+
+
+def search_tasks(request):
+    if request.method == 'GET':
+        number = request.GET.get('number')
+        name = request.GET.get('name')
+
+        tasks = Task.objects.all()
+
+        if number:
+            tasks = tasks.filter(number__icontains=number)
+        if name:
+            tasks = tasks.filter(name__icontains=name)
+
+        tasks_data = []
+        for task in tasks:
+            tasks_data.append({
+                'id': task.id,
+                'number': task.number,
+                'created': task.created.strftime('%d.%m.%Y %H:%M') if task.created else '',
+                'name': task.name,
+                'type': task.type,
+                'priority': task.priority,
+                'iteration': task.iteration,
+                'status': task.status,
+                'finished': task.finished.strftime('%Y-%m-%d') if task.finished else '',
+                'user_id': task.user_id,
+                'user_name': f"{task.user.first_name} {task.user.last_name}" if task.user else '',
+                'result': task.result,
+                'comment': task.comment
+            })
+
+        return JsonResponse({'tasks': tasks_data})
+
+    return JsonResponse({'error': 'Invalid request method'})

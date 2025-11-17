@@ -86,36 +86,40 @@ body {
     min-height: 100vh;
 }
 
-
-
-/* Стили поиска */
 .search-bar {
-    background: #f8f9fa; /* Светло-серый вместо #f5f5f5 */
+    background: #f8f9fa;
     padding: 5px 0;
-    border-bottom: 1px solid #e9ecef; /* Согласованный серый */
+    border-bottom: 1px solid #e9ecef;
     margin-top: 56px;
     height: 35px;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    flex-shrink: 0;
+    width: 100%;
+    justify-content: flex-end; /* Добавьте это */
 }
 
 .search-form {
     width: auto;
-    margin: 0;
+    margin: 0; /* Уберите auto */
     padding: 0 20px;
     display: flex;
     justify-content: flex-end;
+    box-sizing: border-box;
 }
 
 .search-input {
-    width: 200px;
+    width: 300px; /* Увеличьте ширину (было 200px) */
     padding: 5px 10px;
-    border: 1px solid #dee2e6; /* Согласованный серый */
+    border: 1px solid #dee2e6;
     border-radius: 3px;
     font-size: 13px;
     background: white;
     flex-shrink: 0;
+}
+
+.search-input::placeholder {
+    font-style: italic;
 }
 
 .search-btn {
@@ -132,27 +136,6 @@ body {
 
 .search-btn:hover {
     background: #5A2D72; /* Более темный оттенок при наведении */
-}
-
-.page-container ~ .search-bar {
-    position: fixed;
-    top: 56px;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    background: #f8f9fa;
-}
-
-.page-container ~ .search-bar .search-form {
-    width: auto;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.page-container ~ .search-bar .search-input {
-    width: 200px;
-    flex-shrink: 0;
 }
 
 /* Стили главной страницы */

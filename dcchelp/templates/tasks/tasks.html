@@ -87,20 +87,21 @@
     <!-- Таблица задач -->
     <div class="tasks-list">
         <table class="tasks-table" id="tasksTable">
-            <p class="tasks-title">Задачи (поступившие за последние 72 часа)</p>
+            <p class="tasks-title">Задачи, поступившие за последние 72 часа.</p>
             <div class="filters-container">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="showMyTasks">
                     <label class="form-check-label" for="showMyTasks">
                         Показывать только мои задачи
                     </label>
-                </div>
+                </div>|
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="showUnfinishedTasks">
                     <label class="form-check-label" for="showUnfinishedTasks">
                         Показывать только незавершенные задачи
                     </label>
-                </div>
+                </div>|
+                <a href="{% url 'archive_statistics' %}">Архив задач</a>
             </div>
             <thead>
                 <tr>

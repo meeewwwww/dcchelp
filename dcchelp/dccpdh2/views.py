@@ -57,17 +57,20 @@ def page_not_found(request, exception):
     }, status=404)
 
 
-# Разобраться и реализовать поиск по сайту
 def search(request):
+    """ Поиск по сайту осуществляется по моделям:
+    Change, поля: 'title', 'text'
+    Task, поля: 'number', 'name', 'result', 'comment'
+    DocumentArticle, поля: 'title', 'clean_text'"""
     query = request.GET.get('q', '')
     changes = []
     tasks = []
     articles = []
 
     if query:
-        changes = Change.search.search(query) # Поиск по полям 'title', 'text'
-        tasks = Task.search.search(query)  # Поиск по полям 'number', 'name', 'result', 'comment'
-        articles = DocumentArticle.search.search(query)  # Поиск по полям 'title', 'clean_text'
+        changes = Change.search.search(query)
+        tasks = Task.search.search(query)
+        articles = DocumentArticle.search.search(query)
 
     return render(request, 'search.html', {
         'changes': changes,

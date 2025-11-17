@@ -28,7 +28,7 @@
     <form class="search-form" action="{% url 'search' %}" method="get">
         <input type="text"
                name="q"
-               placeholder="Поиск по сайту"
+               placeholder="Поиск по заметкам, листу изменений, задачам"
                class="search-input"
                value="{{ request.GET.q }}">
         <button type="submit" class="search-btn">
