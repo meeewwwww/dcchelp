@@ -13,7 +13,7 @@
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 ">
     <!-- Декоративный элемент -->
-    <div class="decoration" style="
+    <div class="decoration-404" style="
         width: 120px;
         height: 120px;
         background: linear-gradient(135deg, #904AB5 0%, #422253 100%);
@@ -54,8 +54,8 @@
     </p>
 
     <!-- Кнопка возврата -->
-    <div class="actions" style="margin-top: 40px;">
-        <a style="
+    <div class="actions-404" style="margin-top: 40px;">
+        <a href="#" class="btn-404-main" style="
             display: inline-flex;
             align-items: center;
             padding: 12px 30px;
@@ -73,10 +73,10 @@
     </div>
 
     <!-- Дополнительные ссылки -->
-    <div class="additional-links" style="margin-top: 30px;">
+    <div class="additional-links-404" style="margin-top: 30px;">
         <p style="color: #6c757d; margin-bottom: 15px;">Или перейдите:</p>
         <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
-            <a href="/" style="
+            <a href="/" class="btn-404-secondary" style="
                 padding: 8px 20px;
                 background: white;
                 color: #422253;
@@ -86,8 +86,8 @@
                 transition: all 0.3s ease;
                 font-weight: 500;
             ">На главную</a>
-            
-            <a href="javascript:history.back()" style="
+
+            <a href="javascript:history.back()" class="btn-404-secondary" style="
                 padding: 8px 20px;
                 background: white;
                 color: #422253;
@@ -102,48 +102,58 @@
 </div>
 
 <style>
-    /* Анимации */
+    /* Анимации только для элементов 404 страницы */
     .page-404 {
-        animation: fadeIn 0.8s ease-in;
+        animation: fadeIn404 0.8s ease-in;
     }
 
-    .decoration {
-        animation: bounce 2s infinite;
+    .decoration-404 {
+        animation: bounce404 2s infinite;
     }
 
-    @keyframes fadeIn {
+    @keyframes fadeIn404 {
         from { opacity: 0; transform: translateY(30px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes bounce {
+    @keyframes bounce404 {
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-10px); }
     }
 
-    /* Ховер-эффекты */
-    a:hover {
+    /* Ховер-эффекты ТОЛЬКО для кнопок 404 страницы */
+    .btn-404-main:hover,
+    .btn-404-secondary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(108, 52, 131, 0.6) !important;
+        box-shadow: 0 6px 20px rgba(108, 52, 131, 0.6);
     }
 
+    .btn-404-main:hover {
+        background: linear-gradient(135deg, #7D3C98 0%, #37204d 100%) !important;
+    }
+
+    .btn-404-secondary:hover {
+        background: #f8f9fa !important;
+        border-color: #904AB5 !important;
+        color: #37204d !important;
+    }
 
     /* Адаптивность */
     @media (max-width: 768px) {
         .page-404 h1 {
             font-size: 2rem;
         }
-        
+
         .page-404 p {
             font-size: 1.1rem;
         }
-        
-        .decoration {
+
+        .decoration-404 {
             width: 100px;
             height: 100px;
         }
-        
-        .decoration span {
+
+        .decoration-404 span {
             font-size: 36px;
         }
     }

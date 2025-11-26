@@ -4,6 +4,7 @@ from django import template
 from bs4 import BeautifulSoup
 from django.utils.safestring import mark_safe
 
+
 register = template.Library()
 
 
@@ -20,6 +21,7 @@ def html_to_text(html_content):
 
 @register.filter
 def highlight_search(text, query):
+    """Подсвечивает ключевые слова в результатах поиска по сайту"""
     if not query or not text:
         return text
 
