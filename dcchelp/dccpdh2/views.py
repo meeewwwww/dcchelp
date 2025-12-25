@@ -1,11 +1,27 @@
+from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib import messages
 from django.shortcuts import render
 from django.views.generic import ListView, TemplateView
 
+from .forms import LoginForm
 from .models import FAQ
 from .utils import DataMixin
 from list_of_changes.models import Change
 from tasks.models import Task
 from documentation.models import DocumentArticle
+
+
+class Login(DataMixin, LoginView):
+    template_name = 'login.html'
+    next_page = 'home'
+    form_class = LoginForm
+    title = 'Вход в систему'
+    redirect_authenticated_user = True
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return self.get_mixin_context(context)
+
 
 
 class IndexView(DataMixin, TemplateView):

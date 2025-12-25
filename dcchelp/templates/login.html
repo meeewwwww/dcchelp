@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-form">
+        <h2>Вход в систему</h2>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Ошибка!</strong> Пожалуйста, проверьте введенные данные.
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <div class="form-group">
+                <label for="id_username">Логин:</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                <div class="error">{{ form.username.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_password">Пароль:</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                <div class="error">{{ form.password.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Войти</button>
+            </div>
+        </form>
+
+        <div class="login-footer">
+            <p>Если у вас нет учетной записи, обратитесь к администратору сайта.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 20px;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 400px;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(108, 52, 131, 0.1);
+}
+
+.login-form h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #6C3483;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #6C3483;
+}
+
+/* Исправляем ширину полей */
+#id_username, #id_password {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+/* Убедимся, что все поля одинаковой ширины */
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #6C3483;
+    box-shadow: 0 0 5px rgba(108, 52, 131, 0.3);
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background-color: #6C3483;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #5a2d6b;
+}
+
+.alert {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.alert-success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.alert-danger {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+.alert-warning {
+    background-color: #fff8e1;
+    color: #f57c00;
+    border: 1px solid #ffecb3;
+}
+
+.error {
+    color: #d32f2f;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.login-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+}
+</style>
+{% endblock %}

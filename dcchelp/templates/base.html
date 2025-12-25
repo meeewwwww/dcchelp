@@ -19,8 +19,20 @@
                 {% for m in menu %}
                 <li><a href="{% url m.url_name %}" class="menu-link">{{ m.title }}</a></li>
                 {% endfor %}
+
             </ul>
         </nav>
+        {% if user.is_authenticated %}
+        <div class="user-menu">
+            <span style="color: white;">Вы авторизованы как {{ user.get_full_name|default:user.username }}</span>
+            <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" style="background: none; border: none; color: #FFD700; cursor: pointer; padding: 0; font-size: inherit;">
+                    Выйти
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
 </header>
 
