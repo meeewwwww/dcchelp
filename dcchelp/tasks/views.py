@@ -108,35 +108,8 @@ def delete_task(request, task_id):
 def archive_statistics(request):
     users = get_user_model().objects.filter(is_superuser=False).order_by('first_name')
 
-    # Получаем данные для статистики (последние 30 дней)
-    from datetime import datetime, timedelta
-    from django.db.models import Count
-
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=30)
-
-    # Статистика по задачам за период
-    chart_data = Task.objects.filter(
-        created__range=[start_date, end_date]
-    ).extra(
-        {'date_created': "date(created)"}
-    ).values('date_created').annotate(
-        count=Count('id')
-    ).order_by('date_created')
-
-    # Форматируем данные для графика
-    formatted_chart_data = []
-    for item in chart_data:
-        formatted_chart_data.append({
-            'date': item['date_created'],
-            'full_date': item['date_created'],
-            'count': item['count']
-        })
-
     context = {
         'users': users,
-        'all_tasks': Task.objects.all().order_by('-created')[:100],
-        'chart_data': formatted_chart_data,
         'menu': DataMixin.menu,
     }
     return render(request, 'tasks/archive_statistics.html', context)
@@ -146,57 +119,88 @@ def get_statistics_data(request):
     if request.method == 'GET':
         start_date = request.GET.get('start_date')
         end_date = request.GET.get('end_date')
-        user_id = request.GET.get('user_id')
+        user_id = request.GET.get('user')
 
         tasks = Task.objects.all()
 
         # Фильтрация по дате
-        if start_date and end_date:
-            start_date = datetime.fromisoformat(start_date)
-            end_date = datetime.fromisoformat(end_date)
-            tasks = tasks.filter(Q(created__gte=start_date) & Q(created__lte=end_date))
-        elif start_date:
-            start_date = datetime.fromisoformat(start_date)
-            tasks = tasks.filter(created__gte=start_date)
-        elif end_date:
-            end_date = datetime.fromisoformat(end_date)
-            tasks = tasks.filter(created__lte=end_date)
+        if start_date:
+            try:
+                start_date_dt = datetime.strptime(start_date, '%Y-%m-%d')
+                tasks = tasks.filter(created__gte=start_date_dt)
+            except ValueError:
+                return JsonResponse({'error': 'Неверный формат начальной даты'})
 
-        # Фильтрация по пользователю
+        if end_date:
+            try:
+                end_date_dt = datetime.strptime(end_date, '%Y-%m-%d')
+                # Добавляем время для включения всего дня
+                end_date_dt = end_date_dt.replace(hour=23, minute=59, second=59)
+                tasks = tasks.filter(created__lte=end_date_dt)
+            except ValueError:
+                return JsonResponse({'error': 'Неверный формат конечной даты'})
+
         if user_id:
-            tasks = tasks.filter(user_id=user_id)
+            # Статистика для конкретного пользователя
+            try:
+                tasks = tasks.filter(user_id=int(user_id))
+                user_stats = tasks.extra(
+                    {'date_created': "date(created)"}
+                ).values('date_created').annotate(
+                    count=Count('id')
+                ).order_by('date_created')
 
-        if user_id:
-            # Статистика для конкретного пользователя - по датам
-            date_stats = tasks.extra(
-                {'date_created': "date(created)"}
-            ).values('date_created').annotate(
-                count=Count('id')
-            ).order_by('date_created')
+                if user_stats:
+                    data = {
+                        'labels': [item['date_created'] for item in user_stats],
+                        'data': [item['count'] for item in user_stats],
+                        'type': 'user'
+                    }
+                else:
+                    # Если задач нет, возвращаем пустые данные с сообщением
+                    data = {
+                        'labels': [],
+                        'data': [],
+                        'type': 'user',
+                        'message': 'Нет данных за выбранный период'
+                    }
 
-            data = {
-                'labels': [item['date_created'].strftime('%d.%m.%Y') for item in date_stats],
-                'data': [item['count'] for item in date_stats],
-                'type': 'user'
-            }
+            except ValueError:
+                return JsonResponse({'error': 'Неверный ID пользователя'})
         else:
-            # Статистика по всем пользователям - по пользователям
+            # Статистика по всем пользователям
             user_stats = tasks.values(
-                'user__first_name', 'user__last_name', 'user_id'
+                'user__first_name', 'user__last_name', 'user__username', 'user_id'
             ).annotate(
                 count=Count('id')
             ).order_by('-count')
 
+            labels = []
+            counts = []
+
+            for item in user_stats:
+                if item['user_id']:
+                    # Формируем имя пользователя
+                    full_name = f"{item['user__first_name'] or ''} {item['user__last_name'] or ''}".strip()
+                    if full_name:
+                        labels.append(full_name)
+                    else:
+                        labels.append(item['user__username'] or f"User #{item['user_id']}")
+                else:
+                    # Если пользователь не указан
+                    labels.append("Не выбрано")
+
+                counts.append(item['count'])
+
             data = {
-                'labels': [
-                    f"{item['user__first_name'] or ''} {item['user__last_name'] or ''}".strip()
-                    if item['user__first_name'] or item['user__last_name']
-                    else f"User #{item['user_id']}"
-                    for item in user_stats
-                ],
-                'data': [item['count'] for item in user_stats],
+                'labels': labels,
+                'data': counts,
                 'type': 'users'
             }
+
+            # Если нет данных, добавляем сообщение
+            if not any(counts):
+                data['message'] = 'Нет данных за выбранный период'
 
         return JsonResponse(data)
 
