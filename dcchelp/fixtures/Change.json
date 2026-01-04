@@ -1,0 +1,67 @@
+[
+{
+  "model": "list_of_changes.change",
+  "pk": 2,
+  "fields": {
+    "number": 2,
+    "title": "Исключение НК из PVA-процессов",
+    "text": "<b>Еще одно изменение</b><div><u>Еще одно изменение<span style=\"font-family: inherit;\">Еще одно изменение</span></u></div><div><i>Еще одно изменение<span style=\"font-family: inherit;\"></span><span style=\"font-family: inherit;\">Еще одно изменение</span><span style=\"font-family: inherit;\">Еще одно изменение</span></i></div>",
+    "created": "2025-10-29T13:57:40.803",
+    "updated": "2026-01-03T21:20:00.662",
+    "active": true,
+    "link_approvement": "https://mail.ru/"
+  }
+},
+{
+  "model": "list_of_changes.change",
+  "pk": 3,
+  "fields": {
+    "number": 3,
+    "title": "Праллельное рассмотрение НПП Техпроект",
+    "text": "По комплектам, в соответствии со списком ниже, согласовано <b>параллельное </b>рассмотрение с заказчиком:<div>2040-TX1</div><div>2040-TX2</div><div>2041-KJ</div><div>2041-KM1.1</div><div>2041-KM1.2</div>",
+    "created": "2025-11-01T15:40:45.060",
+    "updated": "2026-01-03T21:24:46.045",
+    "active": false,
+    "link_approvement": "https://mail.ru/"
+  }
+},
+{
+  "model": "list_of_changes.change",
+  "pk": 4,
+  "fields": {
+    "number": 4,
+    "title": "Выпуск BBB совместно с комплектом РД",
+    "text": "С 21.12.2025 все комплекты <b>РД в цифровых ревизиях</b> выпускаются <b>только с ВВВ</b>.",
+    "created": "2025-11-01T15:58:53.250",
+    "updated": "2026-01-04T11:10:12.867",
+    "active": true,
+    "link_approvement": "http://www.sharepoint.ru/"
+  }
+},
+{
+  "model": "list_of_changes.change",
+  "pk": 5,
+  "fields": {
+    "number": 1,
+    "title": "Передача заключения экспертиз Заказчику (ГГЭ, НГЭ, ГЭЭ и т.д.)",
+    "text": "<i><u>Просто чтобы было, такое простое...</u></i>",
+    "created": "2025-11-01T16:05:48.947",
+    "updated": "2026-01-03T21:18:31.628",
+    "active": true,
+    "link_approvement": "http://www.sharepoint.ru/"
+  }
+},
+{
+  "model": "list_of_changes.change",
+  "pk": 6,
+  "fields": {
+    "number": 5,
+    "title": "Загрузка ПД после экспертиз в Capital Projects",
+    "text": "<div>Вся проектная документация, загружаемая в СТДО должна соответствовать самому заключению. Например, если в заключении указан том <i>PDH2.0129-01-СП_1_2_RU.pdf</i>, где:&nbsp;</div><div>&nbsp; &nbsp; &nbsp;1 - ревизия,&nbsp;</div><div><span style=\"font-family: inherit;\">&nbsp; &nbsp; &nbsp;</span>2 - код изменения,</div><div>то и в нижних колонтитулах документа должны быть обозначены именно эти коды. На каждое изменение (2 в примере) должен быть оформлен свой РВИ с уникальным номером.<br></div>",
+    "created": "2025-11-01T17:05:47.493",
+    "updated": "2026-01-03T21:23:29.244",
+    "active": true,
+    "link_approvement": "https://stepik.org/"
+  }
+}
+]

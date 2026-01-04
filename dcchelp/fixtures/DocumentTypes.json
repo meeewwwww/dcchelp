@@ -1,0 +1,25 @@
+[
+{
+  "model": "documentation.documenttypes",
+  "pk": 1,
+  "fields": {
+    "ru_name": "Проектная документация",
+    "sub_types": [
+      1,
+      4
+    ]
+  }
+},
+{
+  "model": "documentation.documenttypes",
+  "pk": 2,
+  "fields": {
+    "ru_name": "Рабочая документация",
+    "sub_types": [
+      3,
+      4,
+      2
+    ]
+  }
+}
+]

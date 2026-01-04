@@ -1,0 +1,206 @@
+[
+{
+  "model": "tasks.task",
+  "pk": 1,
+  "fields": {
+    "number": "PDH2.15383-GPEN-NEWR-DDTRM-00222",
+    "created": "2026-01-01T11:02:00",
+    "name": "PDH2.15383-2025-KM2_0",
+    "type": "portal",
+    "priority": false,
+    "iteration": 0,
+    "status": "on_hold",
+    "user": 6,
+    "finished": "2025-10-31",
+    "result": "нет согласования",
+    "comment": ""
+  }
+},
+{
+  "model": "tasks.task",
+  "pk": 2,
+  "fields": {
+    "number": "PDH2.15383-URALTEP-NEWR-DDTRM-00125",
+    "created": "2026-01-01T19:02:00",
+    "name": "PDH2.15383-4015-RZA1",
+    "type": "portal",
+    "priority": true,
+    "iteration": 0,
+    "status": "returned",
+    "user": 3,
+    "finished": "2025-10-31",
+    "result": "",
+    "comment": ""
+  }
+},
+{
+  "model": "tasks.task",
+  "pk": 3,
+  "fields": {
+    "number": "PDH2.15383-URALTEP-NEWR-DDTRM-00128",
+    "created": "2025-12-31T00:30:00",
+    "name": "PDH2.15383-4015-KJ",
+    "type": "portal",
+    "priority": false,
+    "iteration": 1,
+    "status": "returned",
+    "user": 3,
+    "finished": "2025-11-01",
+    "result": "",
+    "comment": ""
+  }
+},
+{
+  "model": "tasks.task",
+  "pk": 4,
+  "fields": {
+    "number": "PDH2-NPG-PVA-BBB-00943",
+    "created": "2025-12-31T00:00:00",
+    "name": "PDH2.15383-2025-KM2.2_0",
+    "type": "Портал",
+    "priority": false,
+    "iteration": 0,
+    "status": "in_progress",
+    "user": 2,
+    "finished": null,
+    "result": "тем же ТРМ: PDH2.15383-URALTEP-NEWR-DDTRM-00128",
+    "comment": ""
+  }
+},
+{
+  "model": "tasks.task",
+  "pk": 5,
+  "fields": {
+    "number": "PDH2-NPG-PVA-BBB-00932",
+    "created": "2026-01-01T12:02:00",
+    "name": "PDH2.15383-6042-KM_0",
+    "type": "portal",
+    "priority": true,
+    "iteration": 3,
+    "status": "completed",
+    "user": 3,
+    "finished": "2025-11-01",
+    "result": "",
+    "comment": ""
+  }
+},
+{
+  "model": "tasks.task",
+  "pk": 6,
+  "fields": {
+    "number": "PDH2-NPG-PVA-BBB-00940",
+    "created": "2026-01-01T17:02:00",
+    "name": "PDH2.15383-6013-KM2_0",
+    "type": "portal",
+    "priority": false,
+    "iteration": 0,
+    "status": "on_hold",
+    "user": 6,
+    "finished": null,
+    "result": "",
+    "comment": ""
+  }
+},
+{
+  "model": "tasks.task",
+  "pk": 7,
+  "fields": {
+    "number": "PDH2-NPG-PVA-BBB-00932",
+    "created": "2025-12-31T18:30:00",
+    "name": "PDH2.15383-2095-KJ",
+    "type": "portal",
+    "priority": true,
+    "iteration": 0,
+    "status": "not_taken",
+    "user": 5,
+    "finished": null,
+    "result": "",
+    "comment": ""
+  }
+},
+{
+  "model": "tasks.task",
+  "pk": 8,
+  "fields": {
+    "number": "PDH2.15383-URALTEP-NEWR-DDTRM-00126",
+    "created": "2026-01-01T19:02:00",
+    "name": "PDH2.15383-4015-RZA2",
+    "type": "TRMfromSPO",
+    "priority": true,
+    "iteration": 0,
+    "status": "in_progress",
+    "user": 3,
+    "finished": null,
+    "result": "",
+    "comment": ""
+  }
+},
+{
+  "model": "tasks.task",
+  "pk": 9,
+  "fields": {
+    "number": "PDH2-NPG-PVA-BBB-00948",
+    "created": "2026-01-02T11:02:00",
+    "name": "PDH2.15383-2135-KM2_0",
+    "type": "sending",
+    "priority": false,
+    "iteration": 0,
+    "status": "completed",
+    "user": 3,
+    "finished": "2026-01-02",
+    "result": "",
+    "comment": ""
+  }
+},
+{
+  "model": "tasks.task",
+  "pk": 10,
+  "fields": {
+    "number": "PDH2-0000001876",
+    "created": "2026-01-02T15:02:00",
+    "name": "PDH2.15383-4008-KJ1",
+    "type": "portal",
+    "priority": false,
+    "iteration": 0,
+    "status": "not_taken",
+    "user": 5,
+    "finished": null,
+    "result": "",
+    "comment": ""
+  }
+},
+{
+  "model": "tasks.task",
+  "pk": 11,
+  "fields": {
+    "number": "PDH2-0000001877",
+    "created": "2026-01-02T15:03:00",
+    "name": "PDH2.15383-4008-KJ2.1",
+    "type": "portal",
+    "priority": true,
+    "iteration": 0,
+    "status": "not_taken",
+    "user": 4,
+    "finished": null,
+    "result": "",
+    "comment": ""
+  }
+},
+{
+  "model": "tasks.task",
+  "pk": 12,
+  "fields": {
+    "number": "PDH2-0000001877",
+    "created": "2026-01-02T15:05:00",
+    "name": "PDH2.15383-4008-KJ2.2",
+    "type": "portal",
+    "priority": true,
+    "iteration": 0,
+    "status": "not_taken",
+    "user": 4,
+    "finished": null,
+    "result": "",
+    "comment": ""
+  }
+}
+]
